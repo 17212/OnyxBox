@@ -21,13 +21,13 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    // Optional: Whitelist check (Uncomment and add your email if you want strict access)
-    // const ALLOWED_ADMINS = ["idris.ghamid@gmail.com", "admin@onyxbox.com"];
-    // if (!ALLOWED_ADMINS.includes(email)) {
-    //   setError("Access Denied: You are not an admin.");
-    //   setLoading(false);
-    //   return;
-    // }
+    // Whitelist check
+    const ALLOWED_ADMINS = ["murphysec72@gmail.com", "idris.ghamid@gmail.com"];
+    if (!ALLOWED_ADMINS.includes(email)) {
+      setError("Access Denied: You are not an authorized admin.");
+      setLoading(false);
+      return;
+    }
 
     try {
       await signInWithEmailAndPassword(auth, email, password);

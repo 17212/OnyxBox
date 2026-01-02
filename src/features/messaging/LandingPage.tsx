@@ -10,6 +10,23 @@ import AnimatedBackground from "@/shared/components/AnimatedBackground";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { playSound } from "@/core/utils/sound";
+
+const TypewriterText = ({ text }: { text: string }) => {
+  const [displayedText, setDisplayedText] = useState("");
+
+  useEffect(() => {
+    let i = 0;
+    const timer = setInterval(() => {
+      setDisplayedText(text.substring(0, i + 1));
+      i++;
+      if (i > text.length) clearInterval(timer);
+    }, 50);
+    return () => clearInterval(timer);
+  }, [text]);
+
+  return <span>{displayedText}</span>;
+};
 
 export default function LandingPage() {
   const [message, setMessage] = useState("");
@@ -18,11 +35,10 @@ export default function LandingPage() {
   const [cooldown, setCooldown] = useState(false);
 
   useEffect(() => {
-    // Check local storage for cooldown
     const lastSent = localStorage.getItem("lastSent");
     if (lastSent) {
       const timeDiff = Date.now() - parseInt(lastSent);
-      if (timeDiff < 60000) { // 1 minute cooldown
+      if (timeDiff < 60000) {
         setCooldown(true);
         setTimeout(() => setCooldown(false), 60000 - timeDiff);
       }
@@ -34,6 +50,7 @@ export default function LandingPage() {
     if (!message.trim()) return;
 
     if (cooldown) {
+      playSound("error");
       toast.error("Please wait a moment before sending another message.");
       return;
     }
@@ -52,9 +69,11 @@ export default function LandingPage() {
       
       setSent(true);
       setMessage("");
+      playSound("success");
       toast.success("Message sent securely!");
     } catch (error) {
       console.error("Error sending message:", error);
+      playSound("error");
       toast.error("Failed to send message. Please try again.");
     } finally {
       setLoading(false);
@@ -86,12 +105,13 @@ export default function LandingPage() {
               scale: { duration: 0.5 }
             }}
             exit={{ opacity: 0, y: -300, scale: 0.9, transition: { duration: 0.6, ease: "backIn" } }}
-            className="w-full max-w-lg"
+            className="w-full max-w-lg perspective-1000"
           >
-            <GlassCard className="w-full" hoverEffect>
+            <GlassCard className="w-full" hoverEffect tiltEffect>
               <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold mb-2 text-white">
-                  Send a secret message to <span className="text-gradient">Idris</span>
+                <h1 className="text-4xl font-bold mb-2 text-white h-[80px] sm:h-auto">
+                  <TypewriterText text="Send a secret message to " />
+                  <span className="text-gradient">Idris</span>
                 </h1>
                 <p className="text-gray-400">Your identity will remain anonymous.</p>
               </div>
@@ -104,6 +124,7 @@ export default function LandingPage() {
                     placeholder="Write your message here..."
                     className="w-full h-40 bg-glass-bg border border-glass-border rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none"
                     required
+                    onFocus={() => playSound("hover")}
                   />
                 </div>
 
@@ -132,7 +153,7 @@ export default function LandingPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center"
           >
-            <GlassCard className="flex flex-col items-center justify-center p-12">
+            <GlassCard className="flex flex-col items-center justify-center p-12" tiltEffect>
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -146,6 +167,8 @@ export default function LandingPage() {
               <button
                 onClick={() => setSent(false)}
                 className="mt-8 text-primary hover:text-white transition-colors"
+                onMouseEnter={() => playSound("hover")}
+                onClick={() => playSound("click")}
               >
                 إرسال رسالة أخرى
               </button>

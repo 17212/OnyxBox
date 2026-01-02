@@ -2,17 +2,18 @@
 
 import { motion, HTMLMotionProps } from "framer-motion";
 import { ReactNode } from "react";
+import { playSound } from "@/core/utils/sound";
 
 interface GradientButtonProps extends HTMLMotionProps<"button"> {
   children: ReactNode;
   isLoading?: boolean;
 }
-
-export default function GradientButton({ children, className = "", isLoading, ...props }: GradientButtonProps) {
   return (
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
+      onMouseEnter={() => playSound("hover")}
+      onClick={() => playSound("click")}
       className={`relative overflow-hidden rounded-xl bg-gradient-to-r from-primary to-secondary px-8 py-4 font-bold text-white shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       disabled={isLoading || (props.disabled as boolean)}
       {...props}
