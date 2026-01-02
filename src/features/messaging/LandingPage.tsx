@@ -419,12 +419,12 @@ export default function LandingPage() {
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-full flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(0,240,255,0.3)]"
+                className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-full grid place-items-center mb-8 shadow-[0_0_40px_rgba(0,240,255,0.4)]"
               >
-                <CheckCircle className="w-12 h-12 text-white" />
+                <CheckCircle className="w-14 h-14 text-white" />
               </motion.div>
               
-              <h2 className="text-4xl font-bold text-white mb-8 tracking-tight">تم الإرسال!</h2>
+              <h2 className="text-4xl font-bold text-white mb-10 tracking-tight">تم الإرسال!</h2>
               
               <motion.button
                 onClick={() => {
@@ -434,9 +434,14 @@ export default function LandingPage() {
                 initial={{ opacity: 0.8 }}
                 animate={{ 
                   opacity: [0.8, 1, 0.8],
+                  boxShadow: [
+                    "0 0 0px rgba(0,240,255,0)",
+                    "0 0 25px rgba(0,240,255,0.4)",
+                    "0 0 0px rgba(0,240,255,0)"
+                  ],
                   textShadow: [
                     "0 0 0px rgba(0,240,255,0)",
-                    "0 0 20px rgba(0,240,255,0.5)",
+                    "0 0 15px rgba(0,240,255,0.6)",
                     "0 0 0px rgba(0,240,255,0)"
                   ]
                 }}
@@ -445,7 +450,7 @@ export default function LandingPage() {
                   repeat: Infinity, 
                   ease: "easeInOut" 
                 }}
-                className="text-primary font-bold text-xl hover:text-white transition-colors py-2 px-6 rounded-full border border-primary/20 bg-primary/5"
+                className="text-primary font-bold text-xl hover:text-white transition-colors py-3 px-8 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md"
                 onMouseEnter={() => playSound("hover")}
               >
                 إرسال رسالة أخرى
