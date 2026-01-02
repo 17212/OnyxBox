@@ -55,7 +55,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             className="relative w-full max-w-lg"
           >
-            <GlassCard className="p-8 relative overflow-hidden border-white/10" tiltEffect>
+            <GlassCard className="p-6 md:p-8 relative overflow-hidden border-white/10 max-h-[90vh] overflow-y-auto">
               {/* Decorative Background */}
               <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-[80px]" />
               <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-secondary/20 rounded-full blur-[80px]" />

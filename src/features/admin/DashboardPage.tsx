@@ -195,8 +195,8 @@ export default function DashboardPage() {
                 <motion.div 
                   ref={storyRef}
                   initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 0.8, opacity: 1 }}
-                  className={`w-[400px] h-[711px] bg-[#030305] relative overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center p-8`}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className={`w-full max-w-[400px] aspect-[9/16] bg-[#030305] relative overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center p-6 md:p-8`}
                 >
                   {/* Background Layer */}
                   <div className="absolute inset-0" style={{ background: storyConfig.bg }}></div>

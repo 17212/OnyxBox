@@ -257,7 +257,7 @@ export default function LandingPage() {
             exit={{ opacity: 0, scale: 0.9 }}
             className="w-full max-w-md z-10"
           >
-            <GlassCard className="w-full p-10" hoverEffect tiltEffect>
+            <GlassCard className="w-full p-6 md:p-10">
               <div className="text-center mb-10">
                 <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">OnyxBox</h1>
                 <p className="text-gray-500 font-medium">Secure. Anonymous. Minimal.</p>
@@ -348,18 +348,12 @@ export default function LandingPage() {
         ) : !sent ? (
           <motion.div
             key="form"
-            initial={{ opacity: 0, scale: 0.9, y: 0 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ 
               opacity: 1, 
               scale: 1,
-              y: [0, -10, 0],
             }}
             transition={{
-              y: {
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut"
-              },
               opacity: { duration: 0.5 },
               scale: { duration: 0.5 }
             }}
@@ -373,15 +367,11 @@ export default function LandingPage() {
             className="w-full max-w-xl perspective-1000 z-10"
           >
             <motion.div
-              drag
-              dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-              dragElastic={0.1}
-              whileDrag={{ scale: 1.02, cursor: "grabbing" }}
               className="w-full relative group"
             >
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
               
-              <GlassCard className="p-8 md:p-12 relative" tiltEffect>
+              <GlassCard className="p-6 md:p-12 relative">
                 <div className="text-center mb-8">
                   <motion.h1 
                     initial={{ opacity: 0, y: 20 }}
@@ -484,8 +474,7 @@ export default function LandingPage() {
           >
             <GlassCard 
               className="w-full max-w-md mx-auto relative overflow-hidden" 
-              contentClassName="flex flex-col items-center justify-center p-12 text-center"
-              tiltEffect
+              contentClassName="flex flex-col items-center justify-center p-8 md:p-12 text-center"
             >
               <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-30 pointer-events-none" />
               
