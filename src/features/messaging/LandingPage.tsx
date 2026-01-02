@@ -40,6 +40,87 @@ const TypewriterText = ({ text }: { text: string }) => {
 export default function LandingPage() {
   const [mood, setMood] = useState("👻");
   const MOODS = ["👻", "❤️", "😂", "😡", "😢", "🔥"];
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const lastSent = localStorage.getItem("lastSent");
+    if (lastSent) {
+      const timeDiff = Date.now() - parseInt(lastSent);
+      if (timeDiff < 60000) {
+        setCooldown(true);
+        setTimeout(() => setCooldown(false), 60000 - timeDiff);
+      }
+    }
+  }, []);
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      playSound("success");
+      toast.success("Logged in successfully!");
+    } catch (error) {
+      console.error("Google login error:", error);
+      toast.error("Login failed.");
+      playSound("error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAnonymousLogin = async () => {
+    try {
+      setLoading(true);
+      await signInAnonymously(auth);
+      playSound("success");
+      toast.success("Continued anonymously!");
+    } catch (error) {
+      console.error("Anonymous login error:", error);
+      toast.error("Login failed.");
+      playSound("error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, password);
+        toast.success("Account created!");
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+        toast.success("Logged in!");
+      }
+      playSound("success");
+    } catch (error: any) {
+      console.error("Email auth error:", error);
+      toast.error(error.message || "Authentication failed.");
+      playSound("error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
