@@ -48,8 +48,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground selection:bg-primary/30 selection:text-primary`}
       >
         {children}
-        <footer className="fixed bottom-4 w-full text-center pointer-events-none z-50">
-          <p className="text-[10px] text-gray-600 font-mono opacity-50">
+        <footer className="w-full py-8 text-center pointer-events-none z-50">
+          <p className="text-[10px] text-gray-600 font-mono opacity-50 uppercase tracking-[0.2em]">
             POWERED BY <span className="text-primary font-bold">idrisium</span>
           </p>
         </footer>

@@ -207,7 +207,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden pt-24 md:pt-4">
       <AnimatedBackground />
       <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
       
@@ -225,7 +225,7 @@ export default function LandingPage() {
       <motion.div 
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="fixed top-8 z-50"
+        className="fixed top-6 md:top-8 z-50 left-1/2 -translate-x-1/2"
       >
         <button 
           onClick={() => setShowAbout(true)}
@@ -376,7 +376,7 @@ export default function LandingPage() {
                   <motion.h1 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl font-bold mb-2 text-white h-[80px] sm:h-auto tracking-tight"
+                    className="text-3xl md:text-4xl font-bold mb-2 text-white h-auto tracking-tight"
                   >
                     <TypewriterText text="Send a secret message to " />
                     <span className="text-primary">idris</span>
@@ -403,7 +403,7 @@ export default function LandingPage() {
                   }}
                   initial="hidden"
                   animate="show"
-                  className="flex justify-center gap-4 mb-10"
+                  className="flex flex-wrap justify-center gap-2 md:gap-4 mb-10"
                 >
                   {MOODS.map((m) => (
                     <motion.button
@@ -419,7 +419,7 @@ export default function LandingPage() {
                       }}
                       whileHover={{ scale: 1.2, y: -5 }}
                       whileTap={{ scale: 0.9 }}
-                      className={`text-3xl p-3 rounded-2xl transition-all ${mood === m ? "bg-primary/20 scale-125 shadow-[0_0_20px_rgba(0,240,255,0.3)]" : "bg-white/5 hover:bg-white/10"}`}
+                      className={`text-2xl md:text-3xl p-2 md:p-3 rounded-2xl transition-all ${mood === m ? "bg-primary/20 scale-110 md:scale-125 shadow-[0_0_20px_rgba(0,240,255,0.3)]" : "bg-white/5 hover:bg-white/10"}`}
                     >
                       {m}
                     </motion.button>
