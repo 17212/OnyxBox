@@ -5,51 +5,70 @@ import { useEffect, useState } from "react";
 
 export default function AnimatedBackground() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({
-        x: e.clientX,
-        y: e.clientY,
+      // Throttle mouse updates for performance
+      requestAnimationFrame(() => {
+        setMousePosition({
+          x: e.clientX,
+          y: e.clientY,
+        });
       });
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+    if (!isMobile) {
+      window.addEventListener("mousemove", handleMouseMove);
+    }
+    
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [isMobile]);
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden bg-[#030305]">
       {/* Deep Space Base */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#0a0a1a] via-[#030305] to-[#000000]" />
 
-      {/* Aurora Borealis Effect */}
+      {/* Aurora Borealis Effect - Simplified for Mobile */}
       <motion.div
         animate={{
           rotate: [0, 360],
-          scale: [1, 1.2, 1],
+          scale: isMobile ? [1, 1.1, 1] : [1, 1.2, 1],
         }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-        className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] bg-primary/10 rounded-full blur-[150px] mix-blend-screen pointer-events-none"
+        transition={{ duration: isMobile ? 45 : 30, repeat: Infinity, ease: "linear" }}
+        className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] bg-primary/10 rounded-full blur-[100px] md:blur-[150px] mix-blend-screen pointer-events-none will-change-transform"
       />
       <motion.div
         animate={{
           rotate: [360, 0],
-          scale: [1, 1.3, 1],
+          scale: isMobile ? [1, 1.1, 1] : [1, 1.3, 1],
         }}
-        transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-        className="absolute bottom-[-20%] right-[-10%] w-[80vw] h-[80vw] bg-secondary/10 rounded-full blur-[150px] mix-blend-screen pointer-events-none"
+        transition={{ duration: isMobile ? 50 : 35, repeat: Infinity, ease: "linear" }}
+        className="absolute bottom-[-20%] right-[-10%] w-[80vw] h-[80vw] bg-secondary/10 rounded-full blur-[100px] md:blur-[150px] mix-blend-screen pointer-events-none will-change-transform"
       />
 
-      {/* Interactive Glow */}
-      <motion.div
-        animate={{
-          x: mousePosition.x - 400,
-          y: mousePosition.y - 400,
-        }}
-        transition={{ type: "spring", damping: 50, stiffness: 400 }}
-        className="absolute w-[800px] h-[800px] bg-gradient-to-r from-primary/5 to-secondary/5 rounded-full blur-[100px] pointer-events-none mix-blend-plus-lighter"
-      />
+      {/* Interactive Glow - Disabled on Mobile for Performance */}
+      {!isMobile && (
+        <motion.div
+          animate={{
+            x: mousePosition.x - 400,
+            y: mousePosition.y - 400,
+          }}
+          transition={{ type: "spring", damping: 50, stiffness: 400 }}
+          className="absolute w-[800px] h-[800px] bg-gradient-to-r from-primary/5 to-secondary/5 rounded-full blur-[100px] pointer-events-none mix-blend-plus-lighter will-change-transform"
+        />
+      )}
 
       {/* Cyberpunk Grid */}
       <div 

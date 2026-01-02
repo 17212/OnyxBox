@@ -176,8 +176,8 @@ export default function DashboardPage() {
                 className="w-[400px] h-[711px] bg-[#030305] relative overflow-hidden shadow-2xl flex flex-col items-center justify-center p-8"
                 style={{ transform: "scale(0.8)" }} // Scale down for preview
               >
-                {/* Background Layer */}
-                <div className="absolute inset-0 bg-[url('/aurora.png')] opacity-30 bg-cover bg-center"></div>
+                {/* Background Layer - Replaced Image with CSS Gradient for Performance & Reliability */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/10 to-black"></div>
                 <div className={`absolute inset-0 ${storyConfig.bg}`}></div>
                 
                 <div className="relative z-10 w-full">
