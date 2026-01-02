@@ -37,17 +37,17 @@ export default function DashboardPage() {
   const [storyMessage, setStoryMessage] = useState<Message | null>(null);
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [storyConfig, setStoryConfig] = useState({
-    bg: "bg-gradient-to-b from-transparent via-[#030305]/50 to-[#030305]",
+    bg: "linear-gradient(to bottom, transparent, rgba(3, 3, 5, 0.5), #030305)",
     font: "font-sans",
     showBadge: true,
     accentColor: "text-primary"
   });
 
   const BACKGROUNDS = [
-    { name: "Onyx", value: "bg-gradient-to-b from-transparent via-[#030305]/50 to-[#030305]" },
-    { name: "Sunset", value: "bg-gradient-to-br from-orange-500/20 via-purple-500/20 to-[#030305]" },
-    { name: "Ocean", value: "bg-gradient-to-br from-blue-500/20 via-cyan-500/20 to-[#030305]" },
-    { name: "Neon", value: "bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-[#030305]" },
+    { name: "Onyx", value: "linear-gradient(to bottom, transparent, rgba(3, 3, 5, 0.5), #030305)" },
+    { name: "Sunset", value: "linear-gradient(to bottom right, rgba(249, 115, 22, 0.2), rgba(168, 85, 247, 0.2), #030305)" },
+    { name: "Ocean", value: "linear-gradient(to bottom right, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.2), #030305)" },
+    { name: "Neon", value: "linear-gradient(to bottom right, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2), #030305)" },
   ];
 
   const FONTS = [
@@ -178,12 +178,12 @@ export default function DashboardPage() {
                 style={{ transform: "scale(0.8)" }} // Scale down for preview
               >
                 {/* Background Layer - Replaced Image with CSS Gradient for Performance & Reliability */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/10 to-black"></div>
-                <div className={`absolute inset-0 ${storyConfig.bg}`}></div>
+                <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom right, rgba(88, 28, 135, 0.2), rgba(30, 58, 138, 0.1), #000)" }}></div>
+                <div className="absolute inset-0" style={{ background: storyConfig.bg }}></div>
                 
                 <div className="relative z-10 w-full">
-                  <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"></div>
+                  <div className="backdrop-blur-xl rounded-3xl p-8 shadow-2xl relative overflow-hidden" style={{ backgroundColor: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00f0ff] to-[#7000ff]"></div>
                     
                     <div className="flex justify-center mb-6">
                       <h1 className="text-3xl font-bold text-white tracking-tighter">
@@ -201,8 +201,8 @@ export default function DashboardPage() {
 
                     {storyConfig.showBadge && (
                       <div className="mt-8 flex justify-center items-center gap-2 text-gray-400">
-                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                          <Shield className="w-4 h-4 text-primary" />
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0, 240, 255, 0.2)" }}>
+                          <Shield className="w-4 h-4 text-[#00f0ff]" />
                         </div>
                         <span className="text-sm font-mono">Anonymous Message</span>
                       </div>
