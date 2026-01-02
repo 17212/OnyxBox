@@ -34,6 +34,7 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const storyRef = useRef<HTMLDivElement>(null);
+  const [storyMessage, setStoryMessage] = useState<Message | null>(null);
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [storyConfig, setStoryConfig] = useState({
     bg: "bg-gradient-to-b from-transparent via-[#030305]/50 to-[#030305]",
