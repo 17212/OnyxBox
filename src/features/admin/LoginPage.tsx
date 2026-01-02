@@ -21,11 +21,19 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
+    // Optional: Whitelist check (Uncomment and add your email if you want strict access)
+    // const ALLOWED_ADMINS = ["idris.ghamid@gmail.com", "admin@onyxbox.com"];
+    // if (!ALLOWED_ADMINS.includes(email)) {
+    //   setError("Access Denied: You are not an admin.");
+    //   setLoading(false);
+    //   return;
+    // }
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/admin/dashboard");
     } catch (err: any) {
-      setError("Invalid credentials");
+      setError("Invalid credentials or access denied.");
       console.error(err);
     } finally {
       setLoading(false);

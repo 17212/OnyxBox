@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow anyone to create a message (Public)
+    match /messages/{messageId} {
+      allow create: if true;
+      // Only authenticated users (Admin) can read, update, or delete
+      allow read, update, delete: if request.auth != null;
+    }
+  }
+}
