@@ -177,7 +177,6 @@ export default function LandingPage() {
           const data = change.doc.data();
           if (data.readStatus === true) {
             toast("👁️ Idris just read your message!", {
-              icon: "👁️",
               style: { background: "#000", color: "#fff", border: "1px solid #00f0ff" }
             });
             playSound("notification");

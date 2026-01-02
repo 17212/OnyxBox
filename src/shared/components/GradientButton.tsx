@@ -7,6 +7,7 @@ import { playSound } from "@/core/utils/sound";
 interface GradientButtonProps extends HTMLMotionProps<"button"> {
   children: ReactNode;
   isLoading?: boolean;
+  type?: "button" | "submit" | "reset";
 }
 
 export default function GradientButton({ children, className = "", isLoading, ...props }: GradientButtonProps) {
