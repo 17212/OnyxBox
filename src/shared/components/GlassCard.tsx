@@ -54,7 +54,17 @@ export default function GlassCard({ children, className = "", hoverEffect = fals
       whileHover={hoverEffect ? { scale: 1.02, boxShadow: "0 20px 40px rgba(0,240,255,0.15)" } : {}}
       className={`glass-card rounded-2xl p-6 border border-white/10 shadow-2xl backdrop-blur-xl bg-white/5 ${className}`}
     >
-      <div style={{ transform: "translateZ(50px)" }}>
+      <div 
+        style={{ 
+          transform: "translateZ(50px)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          height: "100%"
+        }}
+      >
         {children}
       </div>
     </motion.div>

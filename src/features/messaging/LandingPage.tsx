@@ -19,7 +19,7 @@ import AnimatedBackground from "@/shared/components/AnimatedBackground";
 import { CheckCircle, AlertCircle, Lock, Mail, User as UserIcon, LogIn } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { playSound } from "@/core/utils/sound";
+import { playSound, vibrate } from "@/core/utils/sound";
 
 const TypewriterText = ({ text }: { text: string }) => {
   const [displayedText, setDisplayedText] = useState("");
@@ -76,6 +76,7 @@ export default function LandingPage() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       playSound("success");
+      vibrate([10, 30, 10]);
       toast.success("Logged in successfully!");
     } catch (error) {
       console.error("Google login error:", error);
@@ -91,6 +92,7 @@ export default function LandingPage() {
       setLoading(true);
       await signInAnonymously(auth);
       playSound("success");
+      vibrate([10, 30, 10]);
       toast.success("Continued anonymously!");
     } catch (error) {
       console.error("Anonymous login error:", error);
@@ -150,6 +152,7 @@ export default function LandingPage() {
       setSent(true);
       setMessage("");
       playSound("success");
+      vibrate([20, 50, 20]);
       toast.success("Message sent securely!");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -235,10 +238,10 @@ export default function LandingPage() {
             exit={{ opacity: 0, scale: 0.9 }}
             className="w-full max-w-md z-10"
           >
-            <GlassCard className="w-full p-8" hoverEffect tiltEffect>
-              <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-white mb-2">Welcome to OnyxBox</h1>
-                <p className="text-gray-400">Please identify yourself to continue.</p>
+            <GlassCard className="w-full p-10" hoverEffect tiltEffect>
+              <div className="text-center mb-10">
+                <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">OnyxBox</h1>
+                <p className="text-gray-500 font-medium">Secure. Anonymous. Minimal.</p>
               </div>
 
               {!showEmailForm ? (
@@ -266,12 +269,12 @@ export default function LandingPage() {
                     Continue with Email
                   </button>
 
-                  <div className="relative my-6">
+                  <div className="relative my-8">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-700"></div>
+                      <div className="w-full border-t border-white/5"></div>
                     </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-[#0a0a0c] text-gray-500">Or stay hidden</span>
+                    <div className="relative flex justify-center text-xs uppercase tracking-widest">
+                      <span className="px-4 bg-[#030305] text-gray-600">Privacy First</span>
                     </div>
                   </div>
 
@@ -349,63 +352,70 @@ export default function LandingPage() {
               filter: "blur(10px)",
               transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] } 
             }}
-            className="w-full max-w-lg perspective-1000 z-10"
+            className="w-full max-w-xl perspective-1000 z-10"
           >
-            <GlassCard className="w-full" hoverEffect tiltEffect>
-              <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold mb-2 text-white h-[80px] sm:h-auto">
-                  <TypewriterText text="Send a secret message to " />
-                  <span className="text-gradient">idris</span>
-                </h1>
-                <p className="text-gray-400">Your identity will remain anonymous.</p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="relative">
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Write your message here..."
-                    className="w-full h-40 bg-glass-bg border border-glass-border rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none"
-                    style={{
-                      boxShadow: `0 0 ${intensity * 30}px rgba(0, 240, 255, ${intensity * 0.5})`
-                    }}
-                    required
-                    onFocus={() => playSound("hover")}
-                  />
+            <motion.div
+              drag
+              dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+              dragElastic={0.1}
+              whileDrag={{ scale: 1.02, cursor: "grabbing" }}
+              className="w-full relative group"
+            >
+              {/* Minimalist Glow Effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+              
+              <GlassCard className="p-8 md:p-12 relative" tiltEffect>
+                <div className="text-center mb-8">
+                  <h1 className="text-4xl font-bold mb-2 text-white h-[80px] sm:h-auto tracking-tight">
+                    <TypewriterText text="Send a secret message to " />
+                    <span className="text-primary">idris</span>
+                  </h1>
+                  <p className="text-gray-500 font-medium">Your identity will remain anonymous.</p>
                 </div>
 
-                {/* Mood Selector */}
-                <div className="flex justify-center gap-4 py-2">
+                <div className="flex justify-center gap-4 mb-10">
                   {MOODS.map((m) => (
-                    <button
+                    <motion.button
                       key={m}
-                      type="button"
-                      onClick={() => setMood(m)}
-                      className={`text-2xl transition-transform hover:scale-125 ${mood === m ? "scale-125 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" : "opacity-50 hover:opacity-100"}`}
+                      onClick={() => {
+                        setMood(m);
+                        playSound("click");
+                        vibrate(5);
+                      }}
+                      whileHover={{ scale: 1.2, y: -5 }}
+                      whileTap={{ scale: 0.9 }}
+                      className={`text-3xl p-3 rounded-2xl transition-all ${mood === m ? "bg-primary/20 scale-125 shadow-[0_0_20px_rgba(0,240,255,0.3)]" : "bg-white/5 hover:bg-white/10"}`}
                     >
                       {m}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
 
-                <GradientButton
-                  type="submit"
-                  className="w-full text-lg"
-                  isLoading={loading}
-                  disabled={cooldown}
-                >
-                  {cooldown ? "Please Wait..." : "إرسال الصندوق الأسود 🚀"}
-                </GradientButton>
-                
-                {cooldown && (
-                  <p className="text-center text-xs text-gray-500 flex items-center justify-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    Slow mode active
-                  </p>
-                )}
-              </form>
-            </GlassCard>
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  <div className="relative group">
+                    <textarea
+                      value={message}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
+                      placeholder="Write your secret here..."
+                      className="w-full h-48 bg-black/40 border border-white/10 rounded-2xl p-6 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all resize-none text-lg leading-relaxed"
+                      required
+                    />
+                    <div className="absolute bottom-4 right-4 text-xs text-gray-600 font-mono">
+                      {message.length} characters
+                    </div>
+                  </div>
+
+                  <GradientButton 
+                    type="submit" 
+                    className="w-full py-5 text-xl font-bold rounded-2xl shadow-lg shadow-primary/20" 
+                    isLoading={loading}
+                    disabled={cooldown}
+                  >
+                    {cooldown ? "Wait for cooldown..." : "Send Secretly"}
+                  </GradientButton>
+                </form>
+              </GlassCard>
+            </motion.div>
           </motion.div>
         ) : (
           <motion.div
@@ -414,12 +424,12 @@ export default function LandingPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center z-10"
           >
-            <GlassCard className="flex flex-col items-center justify-center p-12 text-center" tiltEffect>
+            <GlassCard className="flex flex-col items-center justify-center p-12 text-center w-full max-w-md mx-auto" tiltEffect>
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-full grid place-items-center mb-8 shadow-[0_0_40px_rgba(0,240,255,0.4)]"
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-full grid place-items-center mb-8 shadow-[0_0_50px_rgba(0,240,255,0.5)]"
               >
                 <CheckCircle className="w-14 h-14 text-white" />
               </motion.div>
@@ -430,27 +440,24 @@ export default function LandingPage() {
                 onClick={() => {
                   setSent(false);
                   playSound("click");
+                  vibrate(10);
                 }}
                 initial={{ opacity: 0.8 }}
                 animate={{ 
                   opacity: [0.8, 1, 0.8],
+                  scale: [1, 1.05, 1],
                   boxShadow: [
                     "0 0 0px rgba(0,240,255,0)",
-                    "0 0 25px rgba(0,240,255,0.4)",
-                    "0 0 0px rgba(0,240,255,0)"
-                  ],
-                  textShadow: [
-                    "0 0 0px rgba(0,240,255,0)",
-                    "0 0 15px rgba(0,240,255,0.6)",
+                    "0 0 30px rgba(0,240,255,0.5)",
                     "0 0 0px rgba(0,240,255,0)"
                   ]
                 }}
                 transition={{ 
-                  duration: 3, 
+                  duration: 2, 
                   repeat: Infinity, 
                   ease: "easeInOut" 
                 }}
-                className="text-primary font-bold text-xl hover:text-white transition-colors py-3 px-8 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md"
+                className="text-primary font-bold text-xl hover:text-white transition-colors py-4 px-10 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md"
                 onMouseEnter={() => playSound("hover")}
               >
                 إرسال رسالة أخرى

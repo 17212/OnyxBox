@@ -8,6 +8,8 @@ interface GradientButtonProps extends HTMLMotionProps<"button"> {
   children: ReactNode;
   isLoading?: boolean;
   type?: "button" | "submit" | "reset";
+  className?: string;
+  disabled?: boolean;
 }
 
 export default function GradientButton({ children, className = "", isLoading, ...props }: GradientButtonProps) {

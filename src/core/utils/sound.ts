@@ -13,3 +13,9 @@ export const playSound = (type: "hover" | "click" | "success" | "error" | "notif
   audio.volume = 0.2; // Keep it subtle
   audio.play().catch(() => {}); // Ignore autoplay errors
 };
+
+export const vibrate = (pattern: number | number[] = 10) => {
+  if (typeof window !== "undefined" && navigator.vibrate) {
+    navigator.vibrate(pattern);
+  }
+};
