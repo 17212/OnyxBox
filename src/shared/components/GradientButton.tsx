@@ -8,6 +8,8 @@ interface GradientButtonProps extends HTMLMotionProps<"button"> {
   children: ReactNode;
   isLoading?: boolean;
 }
+
+export default function GradientButton({ children, className = "", isLoading, ...props }: GradientButtonProps) {
   return (
     <motion.button
       whileHover={{ scale: 1.05 }}
