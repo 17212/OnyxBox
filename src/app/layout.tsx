@@ -50,7 +50,7 @@ export default function RootLayout({
         {children}
         <footer className="w-full py-8 text-center pointer-events-none z-50">
           <p className="text-[10px] text-gray-600 font-mono opacity-50 uppercase tracking-[0.2em]">
-            POWERED BY <span className="text-primary font-bold">idrisium</span>
+            POWERED BY <span className="text-gradient-blue font-bold">idrisium</span>
           </p>
         </footer>
       </body>

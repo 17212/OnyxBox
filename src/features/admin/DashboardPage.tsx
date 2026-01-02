@@ -432,7 +432,7 @@ export default function DashboardPage() {
             onClick={() => setShowAbout(true)}
             className="text-3xl font-bold text-white group"
           >
-            onyx<span className="text-primary group-hover:drop-shadow-[0_0_10px_rgba(0,240,255,0.5)] transition-all">box</span>
+            onyx<span className="text-gradient-blue group-hover:brightness-125 transition-all">box</span>
           </motion.button>
           <span className="text-primary/50 text-sm font-normal ml-2">dashboard</span>
           {user?.email === "murphysec72@gmail.com" && (

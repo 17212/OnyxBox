@@ -225,28 +225,36 @@ export default function LandingPage() {
       <motion.div 
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="fixed top-6 md:top-8 z-50 left-1/2 -translate-x-1/2"
+        className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center backdrop-blur-md bg-black/20 border-b border-white/5"
       >
         <button 
           onClick={() => setShowAbout(true)}
-          className="text-4xl font-bold text-white tracking-tighter group"
+          className="text-3xl md:text-4xl font-bold text-white tracking-tighter group flex items-center gap-2"
         >
-          onyx<span className="text-primary group-hover:drop-shadow-[0_0_15px_rgba(0,240,255,0.6)] transition-all">box</span>
+          onyx<span className="text-gradient-blue group-hover:brightness-125 transition-all">box</span>
         </button>
+
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setShowAbout(true)}
+            className="p-2 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 px-4"
+          >
+            <AlertCircle className="w-4 h-4 text-primary" />
+            <span className="text-xs font-bold uppercase tracking-widest hidden sm:inline">About</span>
+          </button>
+
+          {user?.email === "murphysec72@gmail.com" && (
+            <a
+              href="/admin/dashboard"
+              className="bg-red-500/20 border border-red-500/50 text-red-400 p-2 rounded-full font-bold flex items-center gap-2 hover:bg-red-500/30 transition-all"
+              title="Admin Dashboard"
+            >
+              <Lock className="w-4 h-4" />
+            </a>
+          )}
+        </div>
       </motion.div>
 
-      {/* Admin Dashboard Shortcut */}
-      {user?.email === "murphysec72@gmail.com" && (
-        <motion.a
-          href="/admin/dashboard"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute top-6 right-6 z-50 bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-red-500/30 transition-all cursor-pointer"
-        >
-          <Lock className="w-4 h-4" />
-          Admin Dashboard
-        </motion.a>
-      )}
 
       <AnimatePresence mode="wait">
         {!user ? (

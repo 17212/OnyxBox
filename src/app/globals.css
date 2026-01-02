@@ -1,12 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #030305;
+  --background: #020203; /* Deeper black */
   --foreground: #ffffff;
   --primary: #00f0ff;
   --secondary: #7000ff;
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-bg: rgba(255, 255, 255, 0.03);
+  --accent-blue: #0047ab;
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.02);
 }
 
 @theme inline {
@@ -14,6 +15,7 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-secondary: var(--secondary);
+  --color-accent-blue: var(--accent-blue);
   --color-glass-border: var(--glass-border);
   --color-glass-bg: var(--glass-bg);
   --font-sans: var(--font-geist-sans);
@@ -25,6 +27,10 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 50% -20%, rgba(0, 240, 255, 0.05), transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(112, 0, 255, 0.03), transparent 40%);
+  background-attachment: fixed;
 }
 
 /* Glassmorphism Utilities */
@@ -36,14 +42,21 @@ body {
 }
 
 .glass-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 }
 
-.text-gradient {
+.text-gradient-blue {
+  background: linear-gradient(135deg, #0047ab 0%, #00d4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.3));
+}
+
+.text-gradient-primary {
   background: linear-gradient(to right, #00f0ff, #7000ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

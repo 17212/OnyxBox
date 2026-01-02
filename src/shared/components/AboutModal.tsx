@@ -78,11 +78,13 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   </div>
                 </motion.div>
 
-                <h2 className="text-3xl font-bold text-white mb-1 tracking-tight">Idris Ghamid</h2>
-                <p className="text-primary font-mono text-sm mb-6 uppercase tracking-[0.3em]">إدريس غامد</p>
+                <h2 className="text-3xl font-bold text-white mb-1 tracking-tight">
+                  <span className="text-gradient-blue">Idris</span> Ghamid
+                </h2>
+                <p className="text-gradient-blue font-mono text-sm mb-6 uppercase tracking-[0.3em]">إدريس غامد</p>
 
                 <p className="text-gray-400 text-sm leading-relaxed mb-8 max-w-sm">
-                  Lead Developer & Architect at <span className="text-white font-bold">IDRISIUM Corp</span>. 
+                  Lead Developer & Architect at <span className="text-gradient-blue font-bold uppercase tracking-wider">IDRISIUM Corp</span>. 
                   Obsessed with creating pixel-perfect, high-performance digital experiences.
                 </p>
 
