@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   title: "OnyxBox | الصندوق الأسود",
   description: "أرسل رسائل سرية ومجهولة الهوية بأمان تام.",
   icons: {
-    icon: "/Icon.png",
-    shortcut: "/Icon.png",
-    apple: "/Icon.png",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
   },
   manifest: "/manifest.json",
   themeColor: "#030305",

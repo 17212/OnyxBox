@@ -22,6 +22,7 @@ interface Message {
   content: string;
   timestamp: any;
   readStatus: boolean;
+  mood?: string;
 }
 
 export default function DashboardPage() {
@@ -32,6 +33,8 @@ export default function DashboardPage() {
   const [stealthMode, setStealthMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  const storyRef = useRef<HTMLDivElement>(null);
+  const [storyMessage, setStoryMessage] = useState<Message | null>(null);
 
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged((u) => {
@@ -86,28 +89,34 @@ export default function DashboardPage() {
     playSound("click");
   };
 
-  const handleShare = async (id: string) => {
-    const element = document.getElementById(`message-${id}`);
-    if (element) {
-      const canvas = await html2canvas(element, {
-        backgroundColor: null,
-        scale: 2,
-      });
-      const image = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = image;
-      link.download = `onyxbox-story-${id}.png`;
-      link.click();
-      toast.success("تم تحميل الصورة للمشاركة!");
-      playSound("success");
-    }
+  const handleShare = async (msg: Message) => {
+    setStoryMessage(msg);
+    // Wait for state update and render
+    setTimeout(async () => {
+      if (storyRef.current) {
+        const canvas = await html2canvas(storyRef.current, {
+          backgroundColor: "#030305",
+          scale: 2,
+          useCORS: true,
+        });
+        const image = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.href = image;
+        link.download = `onyxbox-story-${msg.id}.png`;
+        link.click();
+        toast.success("تم إنشاء الستوري بنجاح! 📸");
+        playSound("success");
+        setStoryMessage(null);
+      }
+    }, 100);
   };
 
   const handleExport = () => {
     const dataToExport = messages.map(msg => ({
       Content: msg.content,
       Date: msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleString() : "N/A",
-      Read: msg.readStatus ? "Yes" : "No"
+      Read: msg.readStatus ? "Yes" : "No",
+      Mood: msg.mood || "N/A"
     }));
     downloadCSV(dataToExport, "onyxbox_messages.csv");
     toast.success("تم تصدير البيانات بنجاح");
@@ -127,6 +136,45 @@ export default function DashboardPage() {
       <AnimatedBackground />
       <ToastContainer position="bottom-right" theme="dark" />
       
+      {/* Hidden Story Template */}
+      {storyMessage && (
+        <div className="fixed top-0 left-0 -z-50 w-[1080px] h-[1920px] bg-[#030305] flex items-center justify-center p-20" ref={storyRef}>
+          <div className="absolute inset-0 bg-[url('/aurora.png')] opacity-30 bg-cover bg-center"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#030305]/50 to-[#030305]"></div>
+          
+          <div className="relative z-10 w-full max-w-3xl">
+            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-16 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-secondary"></div>
+              
+              <div className="flex justify-center mb-12">
+                <h1 className="text-6xl font-bold text-white tracking-tighter">
+                  Onyx<span className="text-primary">Box</span>
+                </h1>
+              </div>
+
+              <div className="text-center mb-12">
+                <span className="text-8xl animate-bounce">{storyMessage.mood || "👻"}</span>
+              </div>
+
+              <p className="text-5xl text-white font-medium text-center leading-relaxed" style={{ direction: "rtl" }}>
+                "{storyMessage.content}"
+              </p>
+
+              <div className="mt-16 flex justify-center items-center gap-4 text-gray-400">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-primary" />
+                </div>
+                <span className="text-2xl font-mono">Anonymous Message</span>
+              </div>
+            </div>
+            
+            <div className="mt-12 text-center">
+              <p className="text-3xl text-gray-500 font-light tracking-[0.5em]">SEND ME A SECRET</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="flex flex-col md:flex-row justify-between items-center mb-8 relative z-10 gap-4">
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold text-white">
@@ -184,7 +232,7 @@ export default function DashboardPage() {
 
       {filteredMessages.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-[50vh] text-gray-500">
-          <Inbox className="w-16 h-16 mb-4 opacity-20" />
+          <Search className="w-16 h-16 mb-4 opacity-20" />
           <p className="text-xl">No messages found</p>
         </div>
       ) : (
@@ -204,7 +252,15 @@ export default function DashboardPage() {
                     </span>
                     {msg.readStatus && <Check className="w-4 h-4 text-green-500" />}
                   </div>
-                  <p className={`text-white text-lg leading-relaxed whitespace-pre-wrap ${stealthMode ? 'blur-md hover:blur-none transition-all duration-300' : ''}`}>
+                  
+                  {/* Mood Indicator */}
+                  {msg.mood && (
+                    <div className="absolute top-4 right-4 text-2xl animate-pulse">
+                      {msg.mood}
+                    </div>
+                  )}
+
+                  <p className={`text-white text-lg leading-relaxed whitespace-pre-wrap mt-6 ${stealthMode ? 'blur-md hover:blur-none transition-all duration-300' : ''}`}>
                     {msg.content}
                   </p>
                 </div>
@@ -218,7 +274,7 @@ export default function DashboardPage() {
                     {msg.readStatus ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                   <button
-                    onClick={() => handleShare(msg.id)}
+                    onClick={() => handleShare(msg)}
                     className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-blue-400 transition-colors"
                     title="Share to Story"
                   >

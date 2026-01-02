@@ -38,87 +38,8 @@ const TypewriterText = ({ text }: { text: string }) => {
 };
 
 export default function LandingPage() {
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [cooldown, setCooldown] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [showEmailForm, setShowEmailForm] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setAuthLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const lastSent = localStorage.getItem("lastSent");
-    if (lastSent) {
-      const timeDiff = Date.now() - parseInt(lastSent);
-      if (timeDiff < 60000) {
-        setCooldown(true);
-        setTimeout(() => setCooldown(false), 60000 - timeDiff);
-      }
-    }
-  }, []);
-
-  const handleGoogleLogin = async () => {
-    try {
-      setLoading(true);
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      playSound("success");
-      toast.success("Logged in successfully!");
-    } catch (error) {
-      console.error("Google login error:", error);
-      toast.error("Login failed.");
-      playSound("error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAnonymousLogin = async () => {
-    try {
-      setLoading(true);
-      await signInAnonymously(auth);
-      playSound("success");
-      toast.success("Continued anonymously!");
-    } catch (error) {
-      console.error("Anonymous login error:", error);
-      toast.error("Login failed.");
-      playSound("error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEmailAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
-        toast.success("Account created!");
-      } else {
-        await signInWithEmailAndPassword(auth, email, password);
-        toast.success("Logged in!");
-      }
-      playSound("success");
-    } catch (error: any) {
-      console.error("Email auth error:", error);
-      toast.error(error.message || "Authentication failed.");
-      playSound("error");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [mood, setMood] = useState("👻");
+  const MOODS = ["👻", "❤️", "😂", "😡", "😢", "🔥"];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,6 +59,7 @@ export default function LandingPage() {
         readStatus: false,
         senderUid: user.uid,
         isAnonymous: user.isAnonymous,
+        mood: mood,
       });
       
       localStorage.setItem("lastSent", Date.now().toString());
@@ -169,6 +91,19 @@ export default function LandingPage() {
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       <AnimatedBackground />
       <ToastContainer position="top-center" theme="dark" />
+
+      {/* Admin Dashboard Shortcut */}
+      {user?.email === "murphysec72@gmail.com" && (
+        <motion.a
+          href="/admin/dashboard"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-6 right-6 z-50 bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-red-500/30 transition-all cursor-pointer"
+        >
+          <Lock className="w-4 h-4" />
+          Admin Dashboard
+        </motion.a>
+      )}
 
       <AnimatePresence mode="wait">
         {!user ? (
@@ -307,6 +242,20 @@ export default function LandingPage() {
                     required
                     onFocus={() => playSound("hover")}
                   />
+                </div>
+
+                {/* Mood Selector */}
+                <div className="flex justify-center gap-4 py-2">
+                  {MOODS.map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setMood(m)}
+                      className={`text-2xl transition-transform hover:scale-125 ${mood === m ? "scale-125 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" : "opacity-50 hover:opacity-100"}`}
+                    >
+                      {m}
+                    </button>
+                  ))}
                 </div>
 
                 <GradientButton
