@@ -51,7 +51,12 @@ export default function LoginPage() {
           </div>
         </div>
         
-        <h2 className="text-2xl font-bold text-center text-white mb-8">Admin Access</h2>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white tracking-tighter mb-2">
+            onyx<span className="text-primary">box</span>
+          </h1>
+          <p className="text-xs text-gray-500 uppercase tracking-widest font-mono">Admin Portal</p>
+        </div>
         
         {error && (
           <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-3 rounded-lg mb-6 text-center text-sm">

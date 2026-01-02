@@ -20,6 +20,7 @@ import { CheckCircle, AlertCircle, Lock, Mail, User as UserIcon, LogIn } from "l
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { playSound, vibrate } from "@/core/utils/sound";
+import AboutModal from "@/shared/components/AboutModal";
 
 const TypewriterText = ({ text }: { text: string }) => {
   const [displayedText, setDisplayedText] = useState("");
@@ -51,6 +52,7 @@ export default function LandingPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -207,6 +209,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       <AnimatedBackground />
+      <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
       
       {/* Dynamic UI Overlay */}
       <motion.div 
@@ -217,6 +220,20 @@ export default function LandingPage() {
       />
 
       <ToastContainer position="top-center" theme="dark" />
+
+      {/* Header Branding */}
+      <motion.div 
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="fixed top-8 z-50"
+      >
+        <button 
+          onClick={() => setShowAbout(true)}
+          className="text-4xl font-bold text-white tracking-tighter group"
+        >
+          onyx<span className="text-primary group-hover:drop-shadow-[0_0_15px_rgba(0,240,255,0.6)] transition-all">box</span>
+        </button>
+      </motion.div>
 
       {/* Admin Dashboard Shortcut */}
       {user?.email === "murphysec72@gmail.com" && (
@@ -346,7 +363,6 @@ export default function LandingPage() {
               opacity: { duration: 0.5 },
               scale: { duration: 0.5 }
             }}
-            // Modern "Send" Animation: Slide up, fade out, and slight scale
             exit={{ 
               opacity: 0, 
               y: -100,
@@ -363,7 +379,6 @@ export default function LandingPage() {
               whileDrag={{ scale: 1.02, cursor: "grabbing" }}
               className="w-full relative group"
             >
-              {/* Minimalist Glow Effect */}
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
               
               <GlassCard className="p-8 md:p-12 relative" tiltEffect>
@@ -426,7 +441,7 @@ export default function LandingPage() {
                     <div className="relative group">
                       <textarea
                         value={message}
-                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
+                        onChange={(e) => setMessage(e.target.value)}
                         placeholder="Write your secret here..."
                         className="w-full h-40 bg-black/40 border border-white/10 rounded-2xl p-6 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all resize-none text-lg leading-relaxed"
                         required
@@ -472,7 +487,6 @@ export default function LandingPage() {
               contentClassName="flex flex-col items-center justify-center p-12 text-center"
               tiltEffect
             >
-              {/* Premium Background Glow */}
               <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-30 pointer-events-none" />
               
               <motion.div
