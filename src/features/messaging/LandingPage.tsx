@@ -165,10 +165,12 @@ export default function LandingPage() {
               <h2 className="text-3xl font-bold text-white mb-2">تم الإرسال!</h2>
               <p className="text-gray-300 text-lg">تم التشفير والإرسال بنجاح</p>
               <button
-                onClick={() => setSent(false)}
+                onClick={() => {
+                  setSent(false);
+                  playSound("click");
+                }}
                 className="mt-8 text-primary hover:text-white transition-colors"
                 onMouseEnter={() => playSound("hover")}
-                onClick={() => playSound("click")}
               >
                 إرسال رسالة أخرى
               </button>

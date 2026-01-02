@@ -20,13 +20,16 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "OnyxBox | The Black Box",
-  description: "Send anonymous messages to Idris. Encrypted & Secure.",
+  title: "OnyxBox | الصندوق الأسود",
+  description: "أرسل رسائل سرية ومجهولة الهوية بأمان تام.",
   icons: {
-    icon: "/icon.png",
-    apple: "/apple-icon.png",
+    icon: "/Icon.png",
+    shortcut: "/Icon.png",
+    apple: "/Icon.png",
   },
   manifest: "/manifest.json",
+  themeColor: "#030305",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   openGraph: {
     title: "OnyxBox",
     description: "Send anonymous messages to Idris.",
