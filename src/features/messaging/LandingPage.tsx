@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, where, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { 
   signInWithPopup, 
   GoogleAuthProvider, 
@@ -160,6 +160,38 @@ export default function LandingPage() {
     }
   };
 
+  // Real-time Reactions Listener
+  useEffect(() => {
+    if (!user) return;
+    
+    const q = query(
+      collection(db, "messages"), 
+      where("senderUid", "==", user.uid),
+      orderBy("timestamp", "desc"),
+      limit(1)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "modified") {
+          const data = change.doc.data();
+          if (data.readStatus === true) {
+            toast("👁️ Idris just read your message!", {
+              icon: "👁️",
+              style: { background: "#000", color: "#fff", border: "1px solid #00f0ff" }
+            });
+            playSound("notification");
+          }
+        }
+      });
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  // Dynamic UI: Calculate intensity based on message length
+  const intensity = Math.min(message.length / 200, 1); // 0 to 1
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#030305]">
@@ -171,6 +203,15 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       <AnimatedBackground />
+      
+      {/* Dynamic UI Overlay */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none z-0"
+        animate={{
+          background: `radial-gradient(circle at 50% 50%, rgba(0, 240, 255, ${intensity * 0.2}), transparent 70%)`
+        }}
+      />
+
       <ToastContainer position="top-center" theme="dark" />
 
       {/* Admin Dashboard Shortcut */}
@@ -193,7 +234,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="w-full max-w-md"
+            className="w-full max-w-md z-10"
           >
             <GlassCard className="w-full p-8" hoverEffect tiltEffect>
               <div className="text-center mb-8">
@@ -290,7 +331,7 @@ export default function LandingPage() {
             animate={{ 
               opacity: 1, 
               scale: 1,
-              y: [0, -15, 0],
+              y: [0, -10, 0],
             }}
             transition={{
               y: {
@@ -301,8 +342,16 @@ export default function LandingPage() {
               opacity: { duration: 0.5 },
               scale: { duration: 0.5 }
             }}
-            exit={{ opacity: 0, y: -300, scale: 0.9, transition: { duration: 0.6, ease: "backIn" } }}
-            className="w-full max-w-lg perspective-1000"
+            // Liquid Dispatch Animation: Suck into black hole
+            exit={{ 
+              opacity: 0, 
+              scale: 0, 
+              rotate: 720,
+              borderRadius: "100%",
+              filter: "blur(20px)",
+              transition: { duration: 0.8, ease: "anticipate" } 
+            }}
+            className="w-full max-w-lg perspective-1000 z-10"
           >
             <GlassCard className="w-full" hoverEffect tiltEffect>
               <div className="text-center mb-8">
@@ -320,6 +369,9 @@ export default function LandingPage() {
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Write your message here..."
                     className="w-full h-40 bg-glass-bg border border-glass-border rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none"
+                    style={{
+                      boxShadow: `0 0 ${intensity * 30}px rgba(0, 240, 255, ${intensity * 0.5})`
+                    }}
                     required
                     onFocus={() => playSound("hover")}
                   />
@@ -362,7 +414,7 @@ export default function LandingPage() {
             key="success"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center"
+            className="text-center z-10"
           >
             <GlassCard className="flex flex-col items-center justify-center p-12" tiltEffect>
               <motion.div

@@ -34,7 +34,26 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const storyRef = useRef<HTMLDivElement>(null);
-  const [storyMessage, setStoryMessage] = useState<Message | null>(null);
+  const [isCustomizing, setIsCustomizing] = useState(false);
+  const [storyConfig, setStoryConfig] = useState({
+    bg: "bg-gradient-to-b from-transparent via-[#030305]/50 to-[#030305]",
+    font: "font-sans",
+    showBadge: true,
+    accentColor: "text-primary"
+  });
+
+  const BACKGROUNDS = [
+    { name: "Onyx", value: "bg-gradient-to-b from-transparent via-[#030305]/50 to-[#030305]" },
+    { name: "Sunset", value: "bg-gradient-to-br from-orange-500/20 via-purple-500/20 to-[#030305]" },
+    { name: "Ocean", value: "bg-gradient-to-br from-blue-500/20 via-cyan-500/20 to-[#030305]" },
+    { name: "Neon", value: "bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-[#030305]" },
+  ];
+
+  const FONTS = [
+    { name: "Modern", value: "font-sans" },
+    { name: "Serif", value: "font-serif" },
+    { name: "Mono", value: "font-mono" },
+  ];
 
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged((u) => {
@@ -89,26 +108,35 @@ export default function DashboardPage() {
     playSound("click");
   };
 
-  const handleShare = async (msg: Message) => {
+  const handleShare = (msg: Message) => {
     setStoryMessage(msg);
-    // Wait for state update and render
-    setTimeout(async () => {
-      if (storyRef.current) {
+    setIsCustomizing(true);
+    playSound("click");
+  };
+
+  const downloadStory = async () => {
+    if (storyRef.current) {
+      try {
         const canvas = await html2canvas(storyRef.current, {
           backgroundColor: "#030305",
           scale: 2,
           useCORS: true,
+          logging: false,
         });
         const image = canvas.toDataURL("image/png");
         const link = document.createElement("a");
         link.href = image;
-        link.download = `onyxbox-story-${msg.id}.png`;
+        link.download = `onyxbox-story-${storyMessage?.id}.png`;
         link.click();
         toast.success("تم إنشاء الستوري بنجاح! 📸");
         playSound("success");
+        setIsCustomizing(false);
         setStoryMessage(null);
+      } catch (error) {
+        console.error("Error generating story:", error);
+        toast.error("Failed to generate story");
       }
-    }, 100);
+    }
   };
 
   const handleExport = () => {
@@ -136,41 +164,116 @@ export default function DashboardPage() {
       <AnimatedBackground />
       <ToastContainer position="bottom-right" theme="dark" />
       
-      {/* Hidden Story Template */}
-      {storyMessage && (
-        <div className="fixed top-0 left-0 -z-50 w-[1080px] h-[1920px] bg-[#030305] flex items-center justify-center p-20" ref={storyRef}>
-          <div className="absolute inset-0 bg-[url('/aurora.png')] opacity-30 bg-cover bg-center"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#030305]/50 to-[#030305]"></div>
-          
-          <div className="relative z-10 w-full max-w-3xl">
-            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-16 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-secondary"></div>
-              
-              <div className="flex justify-center mb-12">
-                <h1 className="text-6xl font-bold text-white tracking-tighter">
-                  Onyx<span className="text-primary">Box</span>
-                </h1>
-              </div>
-
-              <div className="text-center mb-12">
-                <span className="text-8xl animate-bounce">{storyMessage.mood || "👻"}</span>
-              </div>
-
-              <p className="text-5xl text-white font-medium text-center leading-relaxed" style={{ direction: "rtl" }}>
-                "{storyMessage.content}"
-              </p>
-
-              <div className="mt-16 flex justify-center items-center gap-4 text-gray-400">
-                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-primary" />
-                </div>
-                <span className="text-2xl font-mono">Anonymous Message</span>
-              </div>
-            </div>
+      {/* Social Card Customizer Modal */}
+      {isCustomizing && storyMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <div className="mt-12 text-center">
-              <p className="text-3xl text-gray-500 font-light tracking-[0.5em]">SEND ME A SECRET</p>
+            {/* Preview Area */}
+            <div className="lg:col-span-2 flex items-center justify-center">
+              <div 
+                ref={storyRef}
+                className="w-[400px] h-[711px] bg-[#030305] relative overflow-hidden shadow-2xl flex flex-col items-center justify-center p-8"
+                style={{ transform: "scale(0.8)" }} // Scale down for preview
+              >
+                {/* Background Layer */}
+                <div className="absolute inset-0 bg-[url('/aurora.png')] opacity-30 bg-cover bg-center"></div>
+                <div className={`absolute inset-0 ${storyConfig.bg}`}></div>
+                
+                <div className="relative z-10 w-full">
+                  <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"></div>
+                    
+                    <div className="flex justify-center mb-6">
+                      <h1 className="text-3xl font-bold text-white tracking-tighter">
+                        Onyx<span className={storyConfig.accentColor}>Box</span>
+                      </h1>
+                    </div>
+
+                    <div className="text-center mb-6">
+                      <span className="text-6xl animate-bounce inline-block">{storyMessage.mood || "👻"}</span>
+                    </div>
+
+                    <p className={`text-2xl text-white font-medium text-center leading-relaxed ${storyConfig.font}`} style={{ direction: "rtl" }}>
+                      "{storyMessage.content}"
+                    </p>
+
+                    {storyConfig.showBadge && (
+                      <div className="mt-8 flex justify-center items-center gap-2 text-gray-400">
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                          <Shield className="w-4 h-4 text-primary" />
+                        </div>
+                        <span className="text-sm font-mono">Anonymous Message</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-8 text-center">
+                    <p className="text-xl text-gray-500 font-light tracking-[0.5em]">SEND ME A SECRET</p>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Controls Area */}
+            <GlassCard className="h-fit space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-white">Customize Story</h2>
+                <button onClick={() => setIsCustomizing(false)} className="text-gray-400 hover:text-white">
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-400 mb-2 block">Background</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {BACKGROUNDS.map((bg) => (
+                    <button
+                      key={bg.name}
+                      onClick={() => setStoryConfig({ ...storyConfig, bg: bg.value })}
+                      className={`p-2 rounded-lg border text-sm ${storyConfig.bg === bg.value ? "border-primary text-primary bg-primary/10" : "border-white/10 text-gray-400 hover:bg-white/5"}`}
+                    >
+                      {bg.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm text-gray-400 mb-2 block">Font Style</label>
+                <div className="flex gap-2">
+                  {FONTS.map((font) => (
+                    <button
+                      key={font.name}
+                      onClick={() => setStoryConfig({ ...storyConfig, font: font.value })}
+                      className={`flex-1 p-2 rounded-lg border text-sm ${storyConfig.font === font.value ? "border-primary text-primary bg-primary/10" : "border-white/10 text-gray-400 hover:bg-white/5"}`}
+                    >
+                      {font.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={storyConfig.showBadge}
+                    onChange={(e) => setStoryConfig({ ...storyConfig, showBadge: e.target.checked })}
+                    className="rounded border-gray-600 bg-transparent text-primary focus:ring-primary"
+                  />
+                  Show Verified Badge
+                </label>
+              </div>
+
+              <button
+                onClick={downloadStory}
+                className="w-full py-3 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+              >
+                <Download className="w-5 h-5" />
+                Download Story
+              </button>
+            </GlassCard>
           </div>
         </div>
       )}
