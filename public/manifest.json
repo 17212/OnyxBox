@@ -1,7 +1,7 @@
 {
   "name": "OnyxBox",
   "short_name": "OnyxBox",
-  "description": "Send anonymous messages to Idris.",
+  "description": "Send anonymous messages to idris.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#030305",

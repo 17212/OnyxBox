@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   openGraph: {
     title: "OnyxBox",
-    description: "Send anonymous messages to Idris.",
+    description: "Send anonymous messages to idris.",
     images: ["/icon.png"],
   },
 };

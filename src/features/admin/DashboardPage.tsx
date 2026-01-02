@@ -40,7 +40,7 @@ export default function DashboardPage() {
     bg: "linear-gradient(to bottom, transparent, rgba(3, 3, 5, 0.5), #030305)",
     font: "font-sans",
     showBadge: true,
-    accentColor: "text-primary"
+    accentColor: "#00f0ff"
   });
 
   const BACKGROUNDS = [
@@ -122,7 +122,14 @@ export default function DashboardPage() {
           backgroundColor: "#030305",
           scale: 2,
           useCORS: true,
-          logging: false,
+          logging: true,
+          onclone: (clonedDoc) => {
+            // Ensure the cloned element has no problematic filters or modern colors
+            const el = clonedDoc.querySelector('[ref="storyRef"]') as HTMLElement;
+            if (el) {
+              el.style.filter = 'none';
+            }
+          }
         });
         const image = canvas.toDataURL("image/png");
         const link = document.createElement("a");
@@ -178,39 +185,39 @@ export default function DashboardPage() {
                 style={{ transform: "scale(0.8)" }} // Scale down for preview
               >
                 {/* Background Layer - Replaced Image with CSS Gradient for Performance & Reliability */}
-                <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom right, rgba(88, 28, 135, 0.2), rgba(30, 58, 138, 0.1), #000)" }}></div>
-                <div className="absolute inset-0" style={{ background: storyConfig.bg }}></div>
+                <div className="absolute inset-0" style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom right, rgba(88, 28, 135, 0.2), rgba(30, 58, 138, 0.1), #000)" }}></div>
+                <div className="absolute inset-0" style={{ position: "absolute", inset: 0, background: storyConfig.bg }}></div>
                 
                 <div className="relative z-10 w-full">
-                  <div className="backdrop-blur-xl rounded-3xl p-8 shadow-2xl relative overflow-hidden" style={{ backgroundColor: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00f0ff] to-[#7000ff]"></div>
+                  <div className="rounded-3xl p-8 shadow-2xl relative overflow-hidden" style={{ backgroundColor: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
+                    <div className="absolute top-0 left-0 w-full h-1" style={{ background: "linear-gradient(to right, #00f0ff, #7000ff)" }}></div>
                     
-                    <div className="flex justify-center mb-6">
-                      <h1 className="text-3xl font-bold text-white tracking-tighter">
-                        Onyx<span className={storyConfig.accentColor}>Box</span>
+                    <div className="flex justify-center mb-6" style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
+                      <h1 className="text-3xl font-bold tracking-tighter" style={{ color: "#ffffff", fontSize: "1.875rem", fontWeight: "700" }}>
+                        Onyx<span style={{ color: storyConfig.accentColor }}>Box</span>
                       </h1>
                     </div>
-
-                    <div className="text-center mb-6">
-                      <span className="text-6xl animate-bounce inline-block">{storyMessage.mood || "👻"}</span>
+ 
+                    <div className="text-center mb-6" style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+                      <span className="text-6xl animate-bounce inline-block" style={{ fontSize: "3.75rem", display: "inline-block" }}>{storyMessage.mood || "👻"}</span>
                     </div>
-
-                    <p className={`text-2xl text-white font-medium text-center leading-relaxed ${storyConfig.font}`} style={{ direction: "rtl" }}>
+ 
+                    <p className={`text-2xl font-medium text-center leading-relaxed ${storyConfig.font}`} style={{ direction: "rtl", color: "#ffffff", fontSize: "1.5rem", fontWeight: "500", textAlign: "center", lineHeight: "1.625" }}>
                       "{storyMessage.content}"
                     </p>
-
+ 
                     {storyConfig.showBadge && (
-                      <div className="mt-8 flex justify-center items-center gap-2 text-gray-400">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0, 240, 255, 0.2)" }}>
-                          <Shield className="w-4 h-4 text-[#00f0ff]" />
+                      <div className="mt-8 flex justify-center items-center gap-2" style={{ marginTop: "2rem", display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", color: "#9ca3af" }}>
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ width: "2rem", height: "2rem", borderRadius: "9999px", backgroundColor: "rgba(0, 240, 255, 0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Shield className="w-4 h-4" style={{ width: "1rem", height: "1rem", color: "#00f0ff" }} />
                         </div>
-                        <span className="text-sm font-mono">Anonymous Message</span>
+                        <span className="text-sm font-mono" style={{ fontSize: "0.875rem", fontFamily: "monospace" }}>Anonymous Message</span>
                       </div>
                     )}
                   </div>
                   
-                  <div className="mt-8 text-center">
-                    <p className="text-xl text-gray-500 font-light tracking-[0.5em]">SEND ME A SECRET</p>
+                  <div className="mt-8 text-center" style={{ marginTop: "2rem", textAlign: "center" }}>
+                    <p className="text-xl font-light tracking-[0.5em]" style={{ color: "#6b7280", fontSize: "1.25rem", fontWeight: "300", letterSpacing: "0.5em" }}>SEND ME A SECRET</p>
                   </div>
                 </div>
               </div>

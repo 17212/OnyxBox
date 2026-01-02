@@ -176,7 +176,7 @@ export default function LandingPage() {
         if (change.type === "modified") {
           const data = change.doc.data();
           if (data.readStatus === true) {
-            toast("👁️ Idris just read your message!", {
+            toast("👁️ idris just read your message!", {
               style: { background: "#000", color: "#fff", border: "1px solid #00f0ff" }
             });
             playSound("notification");
@@ -341,14 +341,13 @@ export default function LandingPage() {
               opacity: { duration: 0.5 },
               scale: { duration: 0.5 }
             }}
-            // Liquid Dispatch Animation: Suck into black hole
+            // Modern "Send" Animation: Slide up, fade out, and slight scale
             exit={{ 
               opacity: 0, 
-              scale: 0, 
-              rotate: 720,
-              borderRadius: "100%",
-              filter: "blur(20px)",
-              transition: { duration: 0.8, ease: "anticipate" } 
+              y: -100,
+              scale: 0.9,
+              filter: "blur(10px)",
+              transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] } 
             }}
             className="w-full max-w-lg perspective-1000 z-10"
           >
@@ -356,7 +355,7 @@ export default function LandingPage() {
               <div className="text-center mb-8">
                 <h1 className="text-4xl font-bold mb-2 text-white h-[80px] sm:h-auto">
                   <TypewriterText text="Send a secret message to " />
-                  <span className="text-gradient">Idris</span>
+                  <span className="text-gradient">idris</span>
                 </h1>
                 <p className="text-gray-400">Your identity will remain anonymous.</p>
               </div>
@@ -415,27 +414,42 @@ export default function LandingPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center z-10"
           >
-            <GlassCard className="flex flex-col items-center justify-center p-12" tiltEffect>
+            <GlassCard className="flex flex-col items-center justify-center p-12 text-center" tiltEffect>
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, damping: 10 }}
-                className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-full flex items-center justify-center mb-6 shadow-lg shadow-primary/30"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-full flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(0,240,255,0.3)]"
               >
                 <CheckCircle className="w-12 h-12 text-white" />
               </motion.div>
-              <h2 className="text-3xl font-bold text-white mb-2">تم الإرسال!</h2>
-              <p className="text-gray-300 text-lg">تم التشفير والإرسال بنجاح</p>
-              <button
+              
+              <h2 className="text-4xl font-bold text-white mb-8 tracking-tight">تم الإرسال!</h2>
+              
+              <motion.button
                 onClick={() => {
                   setSent(false);
                   playSound("click");
                 }}
-                className="mt-8 text-primary hover:text-white transition-colors"
+                initial={{ opacity: 0.8 }}
+                animate={{ 
+                  opacity: [0.8, 1, 0.8],
+                  textShadow: [
+                    "0 0 0px rgba(0,240,255,0)",
+                    "0 0 20px rgba(0,240,255,0.5)",
+                    "0 0 0px rgba(0,240,255,0)"
+                  ]
+                }}
+                transition={{ 
+                  duration: 3, 
+                  repeat: Infinity, 
+                  ease: "easeInOut" 
+                }}
+                className="text-primary font-bold text-xl hover:text-white transition-colors py-2 px-6 rounded-full border border-primary/20 bg-primary/5"
                 onMouseEnter={() => playSound("hover")}
               >
                 إرسال رسالة أخرى
-              </button>
+              </motion.button>
             </GlassCard>
           </motion.div>
         )}
