@@ -41,6 +41,7 @@ export default function LandingPage() {
   const [mood, setMood] = useState("👻");
   const MOODS = ["👻", "❤️", "😂", "😡", "😢", "🔥"];
   const [message, setMessage] = useState("");
+  const [senderName, setSenderName] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [cooldown, setCooldown] = useState(false);
@@ -138,6 +139,7 @@ export default function LandingPage() {
     try {
       await addDoc(collection(db, "messages"), {
         content: message,
+        senderName: senderName.trim() || "Anonymous",
         timestamp: serverTimestamp(),
         readStatus: false,
         senderUid: user.uid,
@@ -366,17 +368,45 @@ export default function LandingPage() {
               
               <GlassCard className="p-8 md:p-12 relative" tiltEffect>
                 <div className="text-center mb-8">
-                  <h1 className="text-4xl font-bold mb-2 text-white h-[80px] sm:h-auto tracking-tight">
+                  <motion.h1 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-4xl font-bold mb-2 text-white h-[80px] sm:h-auto tracking-tight"
+                  >
                     <TypewriterText text="Send a secret message to " />
                     <span className="text-primary">idris</span>
-                  </h1>
-                  <p className="text-gray-500 font-medium">Your identity will remain anonymous.</p>
+                  </motion.h1>
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="text-gray-500 font-medium"
+                  >
+                    Your identity will remain anonymous.
+                  </motion.p>
                 </div>
 
-                <div className="flex justify-center gap-4 mb-10">
+                <motion.div 
+                  variants={{
+                    hidden: { opacity: 0 },
+                    show: {
+                      opacity: 1,
+                      transition: {
+                        staggerChildren: 0.1
+                      }
+                    }
+                  }}
+                  initial="hidden"
+                  animate="show"
+                  className="flex justify-center gap-4 mb-10"
+                >
                   {MOODS.map((m) => (
                     <motion.button
                       key={m}
+                      variants={{
+                        hidden: { opacity: 0, scale: 0.5, y: 20 },
+                        show: { opacity: 1, scale: 1, y: 0 }
+                      }}
                       onClick={() => {
                         setMood(m);
                         playSound("click");
@@ -389,19 +419,32 @@ export default function LandingPage() {
                       {m}
                     </motion.button>
                   ))}
-                </div>
+                </motion.div>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
-                  <div className="relative group">
-                    <textarea
-                      value={message}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
-                      placeholder="Write your secret here..."
-                      className="w-full h-48 bg-black/40 border border-white/10 rounded-2xl p-6 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all resize-none text-lg leading-relaxed"
-                      required
-                    />
-                    <div className="absolute bottom-4 right-4 text-xs text-gray-600 font-mono">
-                      {message.length} characters
+                  <div className="space-y-6">
+                    <div className="relative group">
+                      <textarea
+                        value={message}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
+                        placeholder="Write your secret here..."
+                        className="w-full h-40 bg-black/40 border border-white/10 rounded-2xl p-6 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all resize-none text-lg leading-relaxed"
+                        required
+                      />
+                      <div className="absolute bottom-4 right-4 text-xs text-gray-600 font-mono">
+                        {message.length} characters
+                      </div>
+                    </div>
+
+                    <div className="relative group">
+                      <input
+                        type="text"
+                        value={senderName}
+                        onChange={(e) => setSenderName(e.target.value)}
+                        placeholder="Your name (Optional)"
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all"
+                      />
+                      <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 group-focus-within:text-primary transition-colors" />
                     </div>
                   </div>
 
@@ -424,40 +467,46 @@ export default function LandingPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center z-10"
           >
-            <GlassCard className="flex flex-col items-center justify-center p-12 text-center w-full max-w-md mx-auto" tiltEffect>
+            <GlassCard 
+              className="w-full max-w-md mx-auto relative overflow-hidden" 
+              contentClassName="flex flex-col items-center justify-center p-12 text-center"
+              tiltEffect
+            >
+              {/* Premium Background Glow */}
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-30 pointer-events-none" />
+              
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="w-24 h-24 bg-gradient-to-tr from-primary to-secondary rounded-full grid place-items-center mb-8 shadow-[0_0_50px_rgba(0,240,255,0.5)]"
+                className="w-28 h-28 bg-gradient-to-tr from-primary to-secondary rounded-full grid place-items-center mb-8 shadow-[0_0_60px_rgba(0,240,255,0.6)] relative z-10"
               >
-                <CheckCircle className="w-14 h-14 text-white" />
+                <CheckCircle className="w-16 h-16 text-white" />
               </motion.div>
               
-              <h2 className="text-4xl font-bold text-white mb-10 tracking-tight">تم الإرسال!</h2>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="relative z-10"
+              >
+                <h2 className="text-5xl font-bold text-white mb-4 tracking-tighter">تم الإرسال!</h2>
+                <p className="text-primary/80 font-medium mb-10 text-lg">تم التشفير والإرسال بنجاح</p>
+              </motion.div>
               
               <motion.button
                 onClick={() => {
                   setSent(false);
+                  setSenderName("");
                   playSound("click");
                   vibrate(10);
                 }}
-                initial={{ opacity: 0.8 }}
-                animate={{ 
-                  opacity: [0.8, 1, 0.8],
-                  scale: [1, 1.05, 1],
-                  boxShadow: [
-                    "0 0 0px rgba(0,240,255,0)",
-                    "0 0 30px rgba(0,240,255,0.5)",
-                    "0 0 0px rgba(0,240,255,0)"
-                  ]
-                }}
-                transition={{ 
-                  duration: 2, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
-                }}
-                className="text-primary font-bold text-xl hover:text-white transition-colors py-4 px-10 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative z-10 text-primary font-bold text-xl hover:text-white transition-all py-4 px-12 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md hover:bg-primary/20 hover:border-primary/60 shadow-[0_0_20px_rgba(0,240,255,0.1)]"
                 onMouseEnter={() => playSound("hover")}
               >
                 إرسال رسالة أخرى

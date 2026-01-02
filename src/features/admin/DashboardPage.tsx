@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { collection, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/core/lib/firebase";
 import { useRouter } from "next/navigation";
@@ -40,7 +41,10 @@ export default function DashboardPage() {
     bg: "linear-gradient(to bottom, transparent, rgba(3, 3, 5, 0.5), #030305)",
     font: "font-sans",
     showBadge: true,
-    accentColor: "#00f0ff"
+    accentColor: "#00f0ff",
+    fontSize: "text-2xl",
+    textAlign: "text-center",
+    borderRadius: "rounded-3xl"
   });
 
   const BACKGROUNDS = [
@@ -48,7 +52,11 @@ export default function DashboardPage() {
     { name: "Sunset", value: "linear-gradient(to bottom right, rgba(249, 115, 22, 0.2), rgba(168, 85, 247, 0.2), #030305)" },
     { name: "Ocean", value: "linear-gradient(to bottom right, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.2), #030305)" },
     { name: "Neon", value: "linear-gradient(to bottom right, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2), #030305)" },
+    { name: "Emerald", value: "linear-gradient(to bottom right, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1), #030305)" },
+    { name: "Royal", value: "linear-gradient(to bottom right, rgba(109, 40, 217, 0.2), rgba(124, 58, 237, 0.1), #030305)" },
   ];
+
+  const ACCENTS = ["#00f0ff", "#ff00e5", "#7000ff", "#00ff88", "#ffbb00"];
 
   const FONTS = [
     { name: "Modern", value: "font-sans" },
@@ -124,7 +132,6 @@ export default function DashboardPage() {
           useCORS: true,
           logging: true,
           onclone: (clonedDoc) => {
-            // Ensure the cloned element has no problematic filters or modern colors
             const el = clonedDoc.querySelector('[ref="storyRef"]') as HTMLElement;
             if (el) {
               el.style.filter = 'none';
@@ -179,22 +186,31 @@ export default function DashboardPage() {
             
             {/* Preview Area */}
             <div className="lg:col-span-2 flex items-center justify-center">
-              <div 
+              <motion.div 
                 ref={storyRef}
-                className="w-[400px] h-[711px] bg-[#030305] relative overflow-hidden shadow-2xl flex flex-col items-center justify-center p-8"
-                style={{ transform: "scale(0.8)" }} // Scale down for preview
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ 
+                  y: [0, -10, 0],
+                  opacity: 1 
+                }}
+                transition={{
+                  y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                  opacity: { duration: 0.5 }
+                }}
+                className={`w-[400px] h-[711px] bg-[#030305] relative overflow-hidden shadow-2xl flex flex-col items-center justify-center p-8`}
+                style={{ transform: "scale(0.8)" }}
               >
-                {/* Background Layer - Replaced Image with CSS Gradient for Performance & Reliability */}
+                {/* Background Layer */}
                 <div className="absolute inset-0" style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom right, rgba(88, 28, 135, 0.2), rgba(30, 58, 138, 0.1), #000)" }}></div>
                 <div className="absolute inset-0" style={{ position: "absolute", inset: 0, background: storyConfig.bg }}></div>
                 
                 <div className="relative z-10 w-full">
-                  <div className="rounded-3xl p-8 shadow-2xl relative overflow-hidden" style={{ backgroundColor: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
-                    <div className="absolute top-0 left-0 w-full h-1" style={{ background: "linear-gradient(to right, #00f0ff, #7000ff)" }}></div>
+                  <div className={`${storyConfig.borderRadius} p-8 shadow-2xl relative overflow-hidden`} style={{ backgroundColor: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
+                    <div className="absolute top-0 left-0 w-full h-1" style={{ background: `linear-gradient(to right, ${storyConfig.accentColor}, #7000ff)` }}></div>
                     
                     <div className="flex justify-center mb-6" style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
                       <h1 className="text-3xl font-bold tracking-tighter" style={{ color: "#ffffff", fontSize: "1.875rem", fontWeight: "700" }}>
-                        Onyx<span style={{ color: storyConfig.accentColor }}>Box</span>
+                        onyx<span style={{ color: storyConfig.accentColor }}>box</span>
                       </h1>
                     </div>
  
@@ -202,14 +218,14 @@ export default function DashboardPage() {
                       <span className="text-6xl animate-bounce inline-block" style={{ fontSize: "3.75rem", display: "inline-block" }}>{storyMessage.mood || "👻"}</span>
                     </div>
  
-                    <p className={`text-2xl font-medium text-center leading-relaxed ${storyConfig.font}`} style={{ direction: "rtl", color: "#ffffff", fontSize: "1.5rem", fontWeight: "500", textAlign: "center", lineHeight: "1.625" }}>
+                    <p className={`${storyConfig.fontSize} ${storyConfig.textAlign} font-medium leading-relaxed ${storyConfig.font}`} style={{ direction: "rtl", color: "#ffffff", fontWeight: "500", lineHeight: "1.625" }}>
                       "{storyMessage.content}"
                     </p>
  
                     {storyConfig.showBadge && (
                       <div className="mt-8 flex justify-center items-center gap-2" style={{ marginTop: "2rem", display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", color: "#9ca3af" }}>
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ width: "2rem", height: "2rem", borderRadius: "9999px", backgroundColor: "rgba(0, 240, 255, 0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <Shield className="w-4 h-4" style={{ width: "1rem", height: "1rem", color: "#00f0ff" }} />
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ width: "2rem", height: "2rem", borderRadius: "9999px", backgroundColor: `${storyConfig.accentColor}33`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Shield className="w-4 h-4" style={{ width: "1rem", height: "1rem", color: storyConfig.accentColor }} />
                         </div>
                         <span className="text-sm font-mono" style={{ fontSize: "0.875rem", fontFamily: "monospace" }}>Anonymous Message</span>
                       </div>
@@ -220,11 +236,11 @@ export default function DashboardPage() {
                     <p className="text-xl font-light tracking-[0.5em]" style={{ color: "#6b7280", fontSize: "1.25rem", fontWeight: "300", letterSpacing: "0.5em" }}>SEND ME A SECRET</p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Controls Area */}
-            <GlassCard className="h-fit space-y-6">
+            <GlassCard className="h-fit space-y-6 overflow-y-auto max-h-[80vh]">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-white">Customize Story</h2>
                 <button onClick={() => setIsCustomizing(false)} className="text-gray-400 hover:text-white">
@@ -232,51 +248,101 @@ export default function DashboardPage() {
                 </button>
               </div>
 
-              <div>
-                <label className="text-sm text-gray-400 mb-2 block">Background</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {BACKGROUNDS.map((bg) => (
-                    <button
-                      key={bg.name}
-                      onClick={() => setStoryConfig({ ...storyConfig, bg: bg.value })}
-                      className={`p-2 rounded-lg border text-sm ${storyConfig.bg === bg.value ? "border-primary text-primary bg-primary/10" : "border-white/10 text-gray-400 hover:bg-white/5"}`}
-                    >
-                      {bg.name}
-                    </button>
-                  ))}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs uppercase tracking-widest text-gray-500 mb-2 block">Background</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {BACKGROUNDS.map((bg) => (
+                      <button
+                        key={bg.name}
+                        onClick={() => setStoryConfig({ ...storyConfig, bg: bg.value })}
+                        className={`p-2 rounded-lg border text-[10px] ${storyConfig.bg === bg.value ? "border-primary text-primary bg-primary/10" : "border-white/10 text-gray-400 hover:bg-white/5"}`}
+                      >
+                        {bg.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="text-sm text-gray-400 mb-2 block">Font Style</label>
-                <div className="flex gap-2">
-                  {FONTS.map((font) => (
-                    <button
-                      key={font.name}
-                      onClick={() => setStoryConfig({ ...storyConfig, font: font.value })}
-                      className={`flex-1 p-2 rounded-lg border text-sm ${storyConfig.font === font.value ? "border-primary text-primary bg-primary/10" : "border-white/10 text-gray-400 hover:bg-white/5"}`}
-                    >
-                      {font.name}
-                    </button>
-                  ))}
+                <div>
+                  <label className="text-xs uppercase tracking-widest text-gray-500 mb-2 block">Accent Color</label>
+                  <div className="flex gap-2">
+                    {ACCENTS.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setStoryConfig({ ...storyConfig, accentColor: color })}
+                        className={`w-8 h-8 rounded-full border-2 ${storyConfig.accentColor === color ? "border-white scale-110" : "border-transparent"}`}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="flex items-center gap-2 cursor-pointer text-gray-300">
-                  <input
-                    type="checkbox"
-                    checked={storyConfig.showBadge}
-                    onChange={(e) => setStoryConfig({ ...storyConfig, showBadge: e.target.checked })}
-                    className="rounded border-gray-600 bg-transparent text-primary focus:ring-primary"
-                  />
-                  Show Verified Badge
-                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-gray-500 mb-2 block">Font Size</label>
+                    <select 
+                      value={storyConfig.fontSize}
+                      onChange={(e) => setStoryConfig({ ...storyConfig, fontSize: e.target.value })}
+                      className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-xs text-white"
+                    >
+                      <option value="text-xl">Small</option>
+                      <option value="text-2xl">Medium</option>
+                      <option value="text-3xl">Large</option>
+                      <option value="text-4xl">Extra Large</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-gray-500 mb-2 block">Alignment</label>
+                    <div className="flex gap-1">
+                      {["text-left", "text-center", "text-right"].map((align) => (
+                        <button
+                          key={align}
+                          onClick={() => setStoryConfig({ ...storyConfig, textAlign: align })}
+                          className={`flex-1 p-2 rounded-lg border text-[10px] ${storyConfig.textAlign === align ? "border-primary text-primary bg-primary/10" : "border-white/10 text-gray-400"}`}
+                        >
+                          {align.split("-")[1]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs uppercase tracking-widest text-gray-500 mb-2 block">Border Radius</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { name: "None", value: "rounded-none" },
+                      { name: "Medium", value: "rounded-xl" },
+                      { name: "Full", value: "rounded-3xl" }
+                    ].map((r) => (
+                      <button
+                        key={r.name}
+                        onClick={() => setStoryConfig({ ...storyConfig, borderRadius: r.value })}
+                        className={`p-2 rounded-lg border text-[10px] ${storyConfig.borderRadius === r.value ? "border-primary text-primary bg-primary/10" : "border-white/10 text-gray-400"}`}
+                      >
+                        {r.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/5">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-300">
+                    <input
+                      type="checkbox"
+                      checked={storyConfig.showBadge}
+                      onChange={(e) => setStoryConfig({ ...storyConfig, showBadge: e.target.checked })}
+                      className="rounded border-gray-600 bg-transparent text-primary focus:ring-primary"
+                    />
+                    Show Verified Badge
+                  </label>
+                </div>
               </div>
 
               <button
                 onClick={downloadStory}
-                className="w-full py-3 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
               >
                 <Download className="w-5 h-5" />
                 Download Story
@@ -289,7 +355,7 @@ export default function DashboardPage() {
       <header className="flex flex-col md:flex-row justify-between items-center mb-8 relative z-10 gap-4">
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold text-white">
-            OnyxBox <span className="text-primary text-sm font-normal ml-2">Dashboard</span>
+            onyx<span className="text-primary">box</span> <span className="text-primary/50 text-sm font-normal ml-2">dashboard</span>
           </h1>
           {user?.email === "murphysec72@gmail.com" && (
             <span className="px-3 py-1 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/50 flex items-center gap-1">
@@ -343,7 +409,7 @@ export default function DashboardPage() {
 
       {filteredMessages.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-[50vh] text-gray-500">
-          <Search className="w-16 h-16 mb-4 opacity-20" />
+          <Inbox className="w-16 h-16 mb-4 opacity-20" />
           <p className="text-xl">No messages found</p>
         </div>
       ) : (

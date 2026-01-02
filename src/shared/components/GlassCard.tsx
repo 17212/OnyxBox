@@ -8,9 +8,10 @@ interface GlassCardProps {
   className?: string;
   hoverEffect?: boolean;
   tiltEffect?: boolean;
+  contentClassName?: string;
 }
 
-export default function GlassCard({ children, className = "", hoverEffect = false, tiltEffect = false }: GlassCardProps) {
+export default function GlassCard({ children, className = "", contentClassName = "", hoverEffect = false, tiltEffect = false }: GlassCardProps) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
@@ -57,13 +58,8 @@ export default function GlassCard({ children, className = "", hoverEffect = fals
       <div 
         style={{ 
           transform: "translateZ(50px)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          height: "100%"
         }}
+        className={`w-full h-full ${contentClassName}`}
       >
         {children}
       </div>

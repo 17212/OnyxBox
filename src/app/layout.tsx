@@ -50,7 +50,7 @@ export default function RootLayout({
         {children}
         <footer className="fixed bottom-4 w-full text-center pointer-events-none z-50">
           <p className="text-[10px] text-gray-600 font-mono opacity-50">
-            POWERED BY <span className="text-primary font-bold">IDRISIUM</span>
+            POWERED BY <span className="text-primary font-bold">idrisium</span>
           </p>
         </footer>
       </body>
