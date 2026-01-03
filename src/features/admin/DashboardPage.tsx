@@ -227,16 +227,37 @@ export default function DashboardPage() {
           useCORS: true,
           logging: false,
           onclone: (clonedDoc: Document) => {
+            // 1. Add a style tag to override problematic CSS
+            const style = clonedDoc.createElement('style');
+            style.innerHTML = `
+              * { 
+                backdrop-filter: none !important; 
+                -webkit-backdrop-filter: none !important; 
+              }
+              /* Force fallback for modern color functions that html2canvas fails to parse */
+              :root {
+                --color-primary: #00f0ff !important;
+                --color-secondary: #7000ff !important;
+              }
+            `;
+            clonedDoc.head.appendChild(style);
+
+            // 2. Manually clean up any inline oklch/oklab colors
             const el = clonedDoc.getElementById("story-preview-container");
             if (el) {
-              const glassElements = el.querySelectorAll('[style*="backdrop-filter"]');
-              glassElements.forEach((e: any) => {
-                e.style.backdropFilter = "none";
-                e.style.webkitBackdropFilter = "none";
-                if (e.style.backgroundColor.includes("rgba")) {
-                  e.style.backgroundColor = e.style.backgroundColor.replace(/[\d\.]+\)$/, "0.95)");
+              const allElements = el.getElementsByTagName('*');
+              for (let i = 0; i < allElements.length; i++) {
+                const element = allElements[i] as HTMLElement;
+                if (element.style.cssText.includes('oklch') || element.style.cssText.includes('oklab')) {
+                  element.style.cssText = element.style.cssText
+                    .replace(/oklch\([^)]+\)/g, '#00f0ff')
+                    .replace(/oklab\([^)]+\)/g, '#00f0ff');
                 }
-              });
+                // Ensure glass cards have a solid background if blur is removed
+                if (element.style.backgroundColor.includes("rgba")) {
+                  element.style.backgroundColor = element.style.backgroundColor.replace(/[\d\.]+\)$/, "0.95)");
+                }
+              }
             }
           }
         });
