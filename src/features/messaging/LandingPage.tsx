@@ -146,7 +146,7 @@ export default function LandingPage() {
     if (isToxic(message) || isToxic(senderName)) {
       playSound("error");
       toast.error("عيب يا بطل.. خليك محترم في كلامك! 🚫", {
-        icon: "🤫",
+        icon: <span>🤫</span>,
         style: { background: "#000", color: "#fff", border: "1px solid #ff0000" }
       });
       vibrate([100, 50, 100]);
