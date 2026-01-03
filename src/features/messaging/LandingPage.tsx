@@ -16,7 +16,7 @@ import { auth, db } from "@/core/lib/firebase";
 import GlassCard from "@/shared/components/GlassCard";
 import GradientButton from "@/shared/components/GradientButton";
 import AnimatedBackground from "@/shared/components/AnimatedBackground";
-import { CheckCircle, AlertCircle, Lock, Mail, User as UserIcon, LogIn, Bell, Heart, MessageCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, Lock, Mail, User as UserIcon, LogIn, Bell, Heart, MessageCircle, LogOut } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { playSound, vibrate } from "@/core/utils/sound";
@@ -264,6 +264,7 @@ export default function LandingPage() {
         <button 
           onClick={() => setShowAbout(true)}
           className="text-3xl md:text-4xl font-bold text-white tracking-tighter group flex items-center gap-2"
+          dir="ltr"
         >
           onyx<span className="text-gradient-blue group-hover:brightness-125 transition-all">box</span>
         </button>
@@ -276,6 +277,17 @@ export default function LandingPage() {
             <AlertCircle className="w-4 h-4 text-primary" />
             <span className="text-xs font-bold uppercase tracking-widest hidden sm:inline">About</span>
           </button>
+
+          {user && (
+            <button
+              onClick={() => auth.signOut()}
+              className="p-2 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all flex items-center gap-2 px-4"
+              title={AR.dashboard.logoutButton}
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="text-xs font-bold uppercase tracking-widest hidden sm:inline">Logout</span>
+            </button>
+          )}
 
           {user?.email === "murphysec72@gmail.com" && (
             <a

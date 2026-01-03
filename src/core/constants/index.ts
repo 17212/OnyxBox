@@ -198,7 +198,7 @@ export const AR = {
     month: "شهر",
     months: "شهور",
   },
-};
+} as const;
 
 // =================== HELPER FUNCTIONS ===================
 export const timeAgo = (timestamp: any): string => {
@@ -215,11 +215,11 @@ export const timeAgo = (timestamp: any): string => {
   const weeks = Math.floor(days / 7);
   const months = Math.floor(days / 30);
   
-  if (months > 0) return `من ${months} ${AR.timeAgo.months}`;
-  if (weeks > 0) return `من ${weeks} ${AR.timeAgo.weeks}`;
-  if (days > 0) return `من ${days} ${AR.timeAgo.days}`;
-  if (hours > 0) return `من ${hours} ${AR.timeAgo.hours}`;
-  if (minutes > 0) return `من ${minutes} ${AR.timeAgo.minutes}`;
+  if (months > 0) return months === 1 ? `من شهر` : months === 2 ? `من شهرين` : `من ${months} ${AR.timeAgo.months}`;
+  if (weeks > 0) return weeks === 1 ? `من أسبوع` : weeks === 2 ? `من أسبوعين` : `من ${weeks} ${AR.timeAgo.weeks}`;
+  if (days > 0) return days === 1 ? `من يوم` : days === 2 ? `من يومين` : `من ${days} ${AR.timeAgo.days}`;
+  if (hours > 0) return hours === 1 ? `من ساعة` : hours === 2 ? `من ساعتين` : `من ${hours} ${AR.timeAgo.hours}`;
+  if (minutes > 0) return minutes === 1 ? `من دقيقة` : minutes === 2 ? `من دقيقتين` : `من ${minutes} ${AR.timeAgo.minutes}`;
   return AR.timeAgo.now;
 };
 

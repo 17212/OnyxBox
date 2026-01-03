@@ -84,12 +84,12 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   </div>
                 </motion.div>
 
-                <h2 className="text-3xl font-bold text-white mb-1 tracking-tight">
+                <h2 className="text-3xl font-bold text-white mb-1 tracking-tight" dir="ltr">
                   <span className="text-gradient-blue">Idris</span> Ghamid
                 </h2>
                 <p className="text-gradient-blue font-mono text-sm mb-6 uppercase tracking-[0.3em]">إدريس غامد</p>
 
-                <p className="text-gray-400 text-sm leading-relaxed mb-8 max-w-sm">
+                <p className="text-gray-400 text-sm leading-relaxed mb-8 max-w-sm" dir="ltr">
                   {AR.about.description}
                 </p>
 
@@ -121,20 +121,21 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   </a>
 
                   <a 
-                    href="http://idrisium.linkpc.net/"
+                    href="https://onyx-box.vercel.app/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-between w-full p-4 rounded-2xl bg-white/5 border border-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all group"
+                    dir="ltr"
                   >
                     <div className="flex items-center gap-3">
                       <Globe className="w-5 h-5" />
-                      <span className="text-sm font-bold">idrisium.linkpc.net</span>
+                      <span className="text-sm font-bold">onyx-box.vercel.app</span>
                     </div>
                     <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </a>
                 </div>
 
-                <div className="mt-8 pt-8 border-t border-white/5 w-full flex items-center justify-center gap-2 text-[10px] text-gray-600 font-mono uppercase tracking-[0.2em]">
+                <div className="mt-8 pt-8 border-t border-white/5 w-full flex items-center justify-center gap-2 text-[10px] text-gray-600 font-mono uppercase tracking-[0.2em]" dir="ltr">
                   <ShieldCheck className="w-3 h-3 text-primary" />
                   {AR.about.footer}
                 </div>

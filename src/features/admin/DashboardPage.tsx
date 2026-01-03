@@ -508,6 +508,19 @@ export default function DashboardPage() {
                         className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
                       />
                     </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Overlay Opacity</label>
+                        <span className="text-[10px] text-primary font-mono">{Math.round(storyConfig.overlayOpacity * 100)}%</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="1" step="0.05"
+                        value={storyConfig.overlayOpacity}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoryConfig({ ...storyConfig, overlayOpacity: parseFloat(e.target.value) })}
+                        className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
                   </div>
 
                   {/* Toggles Section */}
@@ -554,7 +567,8 @@ export default function DashboardPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowAbout(true)}
-            className="text-3xl font-bold text-white group"
+            className="text-3xl font-bold text-white group flex items-center gap-1"
+            dir="ltr"
           >
             onyx<span className="text-gradient-blue group-hover:brightness-125 transition-all">box</span>
           </motion.button>
@@ -650,14 +664,15 @@ export default function DashboardPage() {
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                        <User className="w-3 h-3" />
-                        {msg.senderName || AR.messageCard.anonymous}
+                        <User className="w-3.5 h-3.5" />
+                        <span className="truncate max-w-[150px]">{msg.senderName || AR.messageCard.anonymous}</span>
                         {msg.isPinned && <Pin className="w-3 h-3 text-primary fill-primary" />}
                         {msg.isFavorite && <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />}
                       </div>
-                      <span className="text-[10px] text-gray-500 font-mono uppercase tracking-widest">
-                        {timeAgo(msg.timestamp)}
-                      </span>
+                      <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-mono uppercase tracking-widest">
+                        <Clock className="w-3 h-3" />
+                        <span>{timeAgo(msg.timestamp)}</span>
+                      </div>
                     </div>
                     <div className="flex items-center gap-1">
                       {msg.readStatus && <Check className="w-4 h-4 text-green-500" />}
