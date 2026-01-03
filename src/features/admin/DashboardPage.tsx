@@ -252,8 +252,8 @@ export default function DashboardPage() {
                 cardWrapper.style.flexShrink = "0";
               }
 
-              // 3. Deep Sanitization of ALL elements
-              const allElements = el.getElementsByTagName('*');
+              // 3. Deep Sanitization of ALL elements in the entire document
+              const allElements = clonedDoc.getElementsByTagName('*');
               for (let i = 0; i < allElements.length; i++) {
                 const item = allElements[i] as HTMLElement;
                 
@@ -262,19 +262,17 @@ export default function DashboardPage() {
                 (item.style as any).webkitBackdropFilter = "none";
 
                 // Fix glass cards background
-                if (item.classList.contains('glass') || (item.style.backgroundColor && item.style.backgroundColor.includes('rgba'))) {
+                if (item.classList.contains('glass') || (item.style.backgroundColor && (item.style.backgroundColor.includes('rgba') || item.style.backgroundColor.includes('okl')))) {
                   item.style.backgroundColor = "rgba(10, 10, 12, 0.95)";
                 }
 
-                // Sanitize inline styles for oklab/oklch
-                const inlineStyle = item.getAttribute('style');
-                if (inlineStyle && (inlineStyle.includes('oklch') || inlineStyle.includes('oklab'))) {
-                  const cleanStyle = inlineStyle
-                    .replace(/oklch\([^)]+\)/g, '#ffffff')
-                    .replace(/oklab\([^)]+\)/g, '#ffffff')
-                    .replace(/oklch\s*\([^)]+\)/g, '#ffffff')
-                    .replace(/oklab\s*\([^)]+\)/g, '#ffffff');
-                  item.setAttribute('style', cleanStyle);
+                // Sanitize all attributes for oklab/oklch/lab/lch/hwb/color
+                const attrs = item.attributes;
+                for (let j = 0; j < attrs.length; j++) {
+                  const attr = attrs[j];
+                  if (attr.value && (attr.value.includes('okl') || attr.value.includes('lab') || attr.value.includes('lch') || attr.value.includes('hwb') || attr.value.includes('color('))) {
+                    attr.value = attr.value.replace(/(oklch|oklab|lab|lch|hwb|color)\s*\([^)]+\)/g, '#ffffff');
+                  }
                 }
 
                 // Force standard colors for text
@@ -287,26 +285,18 @@ export default function DashboardPage() {
               styleTags.forEach(tag => {
                 try {
                   if (tag.innerHTML) {
-                    tag.innerHTML = tag.innerHTML
-                      .replace(/oklch\([^)]+\)/g, '#ffffff')
-                      .replace(/oklab\([^)]+\)/g, '#ffffff')
-                      .replace(/oklch\s*\([^)]+\)/g, '#ffffff')
-                      .replace(/oklab\s*\([^)]+\)/g, '#ffffff');
+                    tag.innerHTML = tag.innerHTML.replace(/(oklch|oklab|lab|lch|hwb|color)\s*\([^)]+\)/g, '#ffffff');
                   }
                 } catch (e) { /* ignore */ }
               });
 
-              // 5. Sanitize the entire head to catch any other sources
-              if (clonedDoc.head) {
-                try {
-                  const headHtml = clonedDoc.head.innerHTML;
-                  if (headHtml.includes('oklch') || headHtml.includes('oklab')) {
-                    clonedDoc.head.innerHTML = headHtml
-                      .replace(/oklch\([^)]+\)/g, '#ffffff')
-                      .replace(/oklab\([^)]+\)/g, '#ffffff');
-                  }
-                } catch (e) { /* ignore */ }
-              }
+              // 5. Sanitize the entire head and body HTML as a fallback
+              try {
+                if (clonedDoc.head) {
+                  clonedDoc.head.innerHTML = clonedDoc.head.innerHTML.replace(/(oklch|oklab|lab|lch|hwb|color)\s*\([^)]+\)/g, '#ffffff');
+                }
+                // Note: We don't sanitize body.innerHTML directly to avoid breaking the DOM structure/references
+              } catch (e) { /* ignore */ }
             }
           }
         });
