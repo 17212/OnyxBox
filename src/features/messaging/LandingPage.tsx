@@ -336,6 +336,15 @@ export default function LandingPage() {
                     {AR.auth.continueEmail}
                   </button>
 
+                  <button
+                    onClick={handleAnonymousLogin}
+                    className="w-full flex items-center justify-center gap-3 bg-white/5 border border-white/10 text-gray-400 font-bold py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all transform hover:scale-[1.02]"
+                    onMouseEnter={() => playSound("hover")}
+                  >
+                    <UserIcon className="w-5 h-5" />
+                    {AR.auth.continueAnonymous || "الدخول كمجهول"}
+                  </button>
+
                   <div className="relative my-8">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-white/5"></div>
