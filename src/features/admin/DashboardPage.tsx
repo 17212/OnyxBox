@@ -37,6 +37,32 @@ export default function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
+  const storyRef = useRef<HTMLDivElement>(null);
+  const [storyMessage, setStoryMessage] = useState<Message | null>(null);
+  const [isCustomizing, setIsCustomizing] = useState(false);
+  
+  const [storyConfig, setStoryConfig] = useState({
+    bg: "linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)",
+    cardStyle: "glass" as "glass" | "solid" | "neon" | "minimal",
+    accentColor: "#00f0ff",
+    fontSize: "text-2xl",
+    textAlign: "text-right" as "text-left" | "text-center" | "text-right",
+    glowEffect: true,
+    showTimestamp: true,
+    showSender: true,
+    showLink: true,
+    linkGlow: true,
+    borderRadius: "40px",
+    padding: "80px",
+    fontFamily: "font-sans",
+    moodSize: "text-6xl",
+    overlayOpacity: 0.5
+  });
+
+  const BACKGROUNDS = [
+    { name: "Onyx", value: "linear-gradient(180deg, #030305 0%, #0a0a0c 100%)" },
+    { name: "Midnight", value: "linear-gradient(135deg, #0f172a 0%, #020617 100%)" },
     { name: "Deep Sea", value: "linear-gradient(135deg, #083344 0%, #020617 100%)" },
     { name: "Purple Rain", value: "linear-gradient(135deg, #4c1d95 0%, #020617 100%)" },
     { name: "Rose Gold", value: "linear-gradient(135deg, #881337 0%, #020617 100%)" },
