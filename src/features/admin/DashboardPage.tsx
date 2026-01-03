@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { collection, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/core/lib/firebase";
@@ -362,7 +362,7 @@ export default function DashboardPage() {
                               className="text-2xl font-black tracking-[0.1em] uppercase"
                               style={{ color: storyConfig.linkGlow ? storyConfig.accentColor : "#ffffff" }}
                             >
-                              idrisium.linkpc.net
+                              onyx-box.vercel.app
                             </span>
                           </div>
                         )}

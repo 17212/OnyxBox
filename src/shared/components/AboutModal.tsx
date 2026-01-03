@@ -78,7 +78,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   <div className="w-full h-full rounded-[22px] bg-[#030305] flex items-center justify-center overflow-hidden">
                     <img 
                       src="/idrisIMAGE.png" 
-                      alt="Idris Ghamid" 
+                      alt="IDRIS GHAMID" 
                       className="w-full h-full object-cover"
                     />
                   </div>
