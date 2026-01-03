@@ -140,7 +140,7 @@ export const AR = {
 
   // === FOOTER ===
   footer: {
-    madeWith: "اتعمل بـ",
+    madeWith: "Powered by",
     byIdrisium: "IDRISIUM Corp",
   },
 
