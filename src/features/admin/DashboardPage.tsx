@@ -227,36 +227,90 @@ export default function DashboardPage() {
           useCORS: true,
           logging: false,
           onclone: (clonedDoc: Document) => {
-            // 1. Add a style tag to override problematic CSS
+            const el = clonedDoc.getElementById("story-preview-container");
+            if (!el) return;
+
+            // 1. Force fallback for modern color functions in the root
             const style = clonedDoc.createElement('style');
             style.innerHTML = `
               * { 
                 backdrop-filter: none !important; 
                 -webkit-backdrop-filter: none !important; 
-              }
-              /* Force fallback for modern color functions that html2canvas fails to parse */
-              :root {
-                --color-primary: #00f0ff !important;
-                --color-secondary: #7000ff !important;
+                animation: none !important;
+                transition: none !important;
               }
             `;
             clonedDoc.head.appendChild(style);
 
-            // 2. Manually clean up any inline oklch/oklab colors
-            const el = clonedDoc.getElementById("story-preview-container");
-            if (el) {
-              const allElements = el.getElementsByTagName('*');
+            // 2. Inline computed styles for all elements in the preview
+            // This converts Tailwind classes and CSS variables to plain RGB/Hex
+            const allElements = el.getElementsByTagName('*');
+            const originalElements = storyRef.current?.getElementsByTagName('*');
+            
+            if (originalElements) {
               for (let i = 0; i < allElements.length; i++) {
-                const element = allElements[i] as HTMLElement;
-                if (element.style.cssText.includes('oklch') || element.style.cssText.includes('oklab')) {
-                  element.style.cssText = element.style.cssText
-                    .replace(/oklch\([^)]+\)/g, '#00f0ff')
-                    .replace(/oklab\([^)]+\)/g, '#00f0ff');
+                const clonedEl = allElements[i] as HTMLElement;
+                const originalEl = originalElements[i] as HTMLElement;
+                if (originalEl) {
+                  const computed = window.getComputedStyle(originalEl);
+                  
+                  // Copy essential styles that html2canvas might miss or fail on
+                  clonedEl.style.color = computed.color;
+                  clonedEl.style.backgroundColor = computed.backgroundColor;
+                  clonedEl.style.borderColor = computed.borderColor;
+                  clonedEl.style.fontSize = computed.fontSize;
+                  clonedEl.style.fontWeight = computed.fontWeight;
+                  clonedEl.style.fontFamily = computed.fontFamily;
+                  clonedEl.style.lineHeight = computed.lineHeight;
+                  clonedEl.style.textAlign = computed.textAlign;
+                  clonedEl.style.padding = computed.padding;
+                  clonedEl.style.margin = computed.margin;
+                  clonedEl.style.borderRadius = computed.borderRadius;
+                  clonedEl.style.borderWidth = computed.borderWidth;
+                  clonedEl.style.borderStyle = computed.borderStyle;
+                  clonedEl.style.display = computed.display;
+                  clonedEl.style.flexDirection = computed.flexDirection;
+                  clonedEl.style.alignItems = computed.alignItems;
+                  clonedEl.style.justifyContent = computed.justifyContent;
+                  clonedEl.style.gap = computed.gap;
+                  clonedEl.style.position = computed.position;
+                  clonedEl.style.top = computed.top;
+                  clonedEl.style.left = computed.left;
+                  clonedEl.style.right = computed.right;
+                  clonedEl.style.bottom = computed.bottom;
+                  clonedEl.style.width = computed.width;
+                  clonedEl.style.height = computed.height;
+                  clonedEl.style.opacity = computed.opacity;
+                  clonedEl.style.zIndex = computed.zIndex;
+                  clonedEl.style.boxShadow = computed.boxShadow;
+                  clonedEl.style.transform = computed.transform;
+                  
+                  // Clean up any remaining oklch/oklab in the inline style just in case
+                  if (clonedEl.style.cssText.includes('oklch') || clonedEl.style.cssText.includes('oklab')) {
+                    clonedEl.style.cssText = clonedEl.style.cssText
+                      .replace(/oklch\([^)]+\)/g, '#00f0ff')
+                      .replace(/oklab\([^)]+\)/g, '#00f0ff');
+                  }
                 }
-                // Ensure glass cards have a solid background if blur is removed
-                if (element.style.backgroundColor.includes("rgba")) {
-                  element.style.backgroundColor = element.style.backgroundColor.replace(/[\d\.]+\)$/, "0.95)");
-                }
+              }
+            }
+
+            // 3. REMOVE all other style and link tags to prevent html2canvas from parsing them
+            // This is the key to avoiding the oklab parsing error
+            const styles = clonedDoc.getElementsByTagName('style');
+            const links = clonedDoc.getElementsByTagName('link');
+            
+            // Remove all links (stylesheets)
+            for (let i = links.length - 1; i >= 0; i--) {
+              if (links[i].rel === 'stylesheet') {
+                links[i].parentNode?.removeChild(links[i]);
+              }
+            }
+            
+            // Remove all styles except the one we just added
+            for (let i = styles.length - 1; i >= 0; i--) {
+              if (styles[i] !== style) {
+                styles[i].parentNode?.removeChild(styles[i]);
               }
             }
           }
