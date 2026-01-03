@@ -37,34 +37,6 @@ export default function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
-  const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
-  const storyRef = useRef<HTMLDivElement>(null);
-  const [storyMessage, setStoryMessage] = useState<Message | null>(null);
-  const [isCustomizing, setIsCustomizing] = useState(false);
-  
-  const [storyConfig, setStoryConfig] = useState({
-    bg: "linear-gradient(to bottom, transparent, rgba(3, 3, 5, 0.5), #030305)",
-    font: "font-sans",
-    showBadge: true,
-    showTimestamp: true,
-    showSender: true,
-    accentColor: "#00f0ff",
-    fontSize: "text-2xl",
-    textAlign: "text-center" as "text-left" | "text-center" | "text-right",
-    borderRadius: "24px",
-    cardStyle: "glass" as "glass" | "solid" | "neon" | "minimal",
-    moodSize: "text-6xl",
-    glowEffect: true,
-    padding: "40px",
-    showLink: true,
-    linkGlow: true,
-    overlayOpacity: 0.4,
-    fontFamily: "font-sans",
-  });
-
-  const BACKGROUNDS = [
-    { name: "Onyx", value: "linear-gradient(180deg, #030305 0%, #0a0a0c 100%)" },
-    { name: "Midnight", value: "linear-gradient(135deg, #0f172a 0%, #020617 100%)" },
     { name: "Deep Sea", value: "linear-gradient(135deg, #083344 0%, #020617 100%)" },
     { name: "Purple Rain", value: "linear-gradient(135deg, #4c1d95 0%, #020617 100%)" },
     { name: "Rose Gold", value: "linear-gradient(135deg, #881337 0%, #020617 100%)" },
@@ -458,7 +430,7 @@ export default function DashboardPage() {
                       </label>
                       <select 
                         value={storyConfig.fontSize}
-                        onChange={(e) => setStoryConfig({ ...storyConfig, fontSize: e.target.value })}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStoryConfig({ ...storyConfig, fontSize: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-primary"
                       >
                         <option value="text-xl">صغير</option>
@@ -493,7 +465,7 @@ export default function DashboardPage() {
                       <input 
                         type="range" min="0" max="100" step="4"
                         value={parseInt(storyConfig.borderRadius)}
-                        onChange={(e) => setStoryConfig({ ...storyConfig, borderRadius: `${e.target.value}px` })}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoryConfig({ ...storyConfig, borderRadius: `${e.target.value}px` })}
                         className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
                       />
                     </div>
@@ -506,7 +478,7 @@ export default function DashboardPage() {
                       <input 
                         type="range" min="20" max="120" step="10"
                         value={parseInt(storyConfig.padding)}
-                        onChange={(e) => setStoryConfig({ ...storyConfig, padding: `${e.target.value}px` })}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoryConfig({ ...storyConfig, padding: `${e.target.value}px` })}
                         className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
                       />
                     </div>
@@ -526,7 +498,7 @@ export default function DashboardPage() {
                           <input 
                             type="checkbox" 
                             checked={(storyConfig as any)[toggle.key]} 
-                            onChange={(e) => setStoryConfig({ ...storyConfig, [toggle.key]: e.target.checked })} 
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoryConfig({ ...storyConfig, [toggle.key]: e.target.checked })} 
                             className="sr-only" 
                           />
                           <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${(storyConfig as any)[toggle.key] ? 'translate-x-5' : ''}`} />
@@ -575,7 +547,7 @@ export default function DashboardPage() {
               type="text" 
               placeholder={AR.dashboard.searchPlaceholder} 
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="bg-glass-bg border border-glass-border rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-primary w-full md:w-64 transition-all"
             />
           </div>
@@ -734,7 +706,7 @@ export default function DashboardPage() {
                       >
                         <textarea
                           value={replyText}
-                          onChange={(e) => setReplyText(e.target.value)}
+                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setReplyText(e.target.value)}
                           placeholder={AR.messageCard.replyPlaceholder}
                           className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary min-h-[80px] resize-none mb-2"
                           style={{ direction: 'rtl' }}
