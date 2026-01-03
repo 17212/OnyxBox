@@ -230,87 +230,75 @@ export default function DashboardPage() {
             const el = clonedDoc.getElementById("story-preview-container");
             if (!el) return;
 
-            // 1. Force fallback for modern color functions in the root
-            const style = clonedDoc.createElement('style');
-            style.innerHTML = `
-              * { 
-                backdrop-filter: none !important; 
-                -webkit-backdrop-filter: none !important; 
-                animation: none !important;
-                transition: none !important;
-              }
+            // 1. COMPLETELY WIPE THE HEAD and replace with safe styles
+            // This is the ultimate fix for the oklab parsing error
+            clonedDoc.head.innerHTML = `
+              <style>
+                * { 
+                  box-sizing: border-box !important;
+                  backdrop-filter: none !important; 
+                  -webkit-backdrop-filter: none !important; 
+                  animation: none !important;
+                  transition: none !important;
+                  text-shadow: none !important;
+                }
+                #story-preview-container {
+                  display: flex !important;
+                  flex-direction: column !important;
+                  align-items: center !important;
+                  justify-content: center !important;
+                  background: ${storyConfig.bg} !important;
+                }
+                .text-white { color: #ffffff !important; }
+                .font-bold { font-weight: 700 !important; }
+                .font-black { font-weight: 900 !important; }
+                .uppercase { text-transform: uppercase !important; }
+              </style>
             `;
-            clonedDoc.head.appendChild(style);
 
-            // 2. Inline computed styles for all elements in the preview
-            // This converts Tailwind classes and CSS variables to plain RGB/Hex
-            const allElements = el.getElementsByTagName('*');
-            const originalElements = storyRef.current?.getElementsByTagName('*');
-            
-            if (originalElements) {
-              for (let i = 0; i < allElements.length; i++) {
-                const clonedEl = allElements[i] as HTMLElement;
-                const originalEl = originalElements[i] as HTMLElement;
-                if (originalEl) {
-                  const computed = window.getComputedStyle(originalEl);
+            // 2. Manually inline computed styles from the original document
+            const allCloned = el.getElementsByTagName('*');
+            const originalContainer = storyRef.current;
+            if (originalContainer) {
+              const allOriginal = originalContainer.getElementsByTagName('*');
+              
+              for (let i = 0; i < allCloned.length; i++) {
+                const c = allCloned[i] as HTMLElement;
+                const o = allOriginal[i] as HTMLElement;
+                if (o) {
+                  const computed = window.getComputedStyle(o);
                   
-                  // Copy essential styles that html2canvas might miss or fail on
-                  clonedEl.style.color = computed.color;
-                  clonedEl.style.backgroundColor = computed.backgroundColor;
-                  clonedEl.style.borderColor = computed.borderColor;
-                  clonedEl.style.fontSize = computed.fontSize;
-                  clonedEl.style.fontWeight = computed.fontWeight;
-                  clonedEl.style.fontFamily = computed.fontFamily;
-                  clonedEl.style.lineHeight = computed.lineHeight;
-                  clonedEl.style.textAlign = computed.textAlign;
-                  clonedEl.style.padding = computed.padding;
-                  clonedEl.style.margin = computed.margin;
-                  clonedEl.style.borderRadius = computed.borderRadius;
-                  clonedEl.style.borderWidth = computed.borderWidth;
-                  clonedEl.style.borderStyle = computed.borderStyle;
-                  clonedEl.style.display = computed.display;
-                  clonedEl.style.flexDirection = computed.flexDirection;
-                  clonedEl.style.alignItems = computed.alignItems;
-                  clonedEl.style.justifyContent = computed.justifyContent;
-                  clonedEl.style.gap = computed.gap;
-                  clonedEl.style.position = computed.position;
-                  clonedEl.style.top = computed.top;
-                  clonedEl.style.left = computed.left;
-                  clonedEl.style.right = computed.right;
-                  clonedEl.style.bottom = computed.bottom;
-                  clonedEl.style.width = computed.width;
-                  clonedEl.style.height = computed.height;
-                  clonedEl.style.opacity = computed.opacity;
-                  clonedEl.style.zIndex = computed.zIndex;
-                  clonedEl.style.boxShadow = computed.boxShadow;
-                  clonedEl.style.transform = computed.transform;
+                  // Copy essential properties manually to ensure they are in RGB/Hex
+                  c.style.color = computed.color;
+                  c.style.backgroundColor = computed.backgroundColor;
+                  c.style.borderColor = computed.borderColor;
+                  c.style.fontSize = computed.fontSize;
+                  c.style.fontWeight = computed.fontWeight;
+                  c.style.fontFamily = computed.fontFamily;
+                  c.style.lineHeight = computed.lineHeight;
+                  c.style.textAlign = computed.textAlign;
+                  c.style.padding = computed.padding;
+                  c.style.margin = computed.margin;
+                  c.style.borderRadius = computed.borderRadius;
+                  c.style.borderWidth = computed.borderWidth;
+                  c.style.borderStyle = computed.borderStyle;
+                  c.style.display = computed.display;
+                  c.style.flexDirection = computed.flexDirection;
+                  c.style.alignItems = computed.alignItems;
+                  c.style.justifyContent = computed.justifyContent;
+                  c.style.gap = computed.gap;
+                  c.style.position = computed.position;
+                  c.style.width = computed.width;
+                  c.style.height = computed.height;
+                  c.style.opacity = computed.opacity;
+                  c.style.boxShadow = computed.boxShadow;
+                  c.style.transform = computed.transform;
                   
-                  // Clean up any remaining oklch/oklab in the inline style just in case
-                  if (clonedEl.style.cssText.includes('oklch') || clonedEl.style.cssText.includes('oklab')) {
-                    clonedEl.style.cssText = clonedEl.style.cssText
-                      .replace(/oklch\([^)]+\)/g, '#00f0ff')
-                      .replace(/oklab\([^)]+\)/g, '#00f0ff');
+                  // Extra safety: replace any oklch/oklab strings if they somehow leaked in
+                  if (c.style.cssText.includes('okl')) {
+                    c.style.cssText = c.style.cssText.replace(/(oklch|oklab)\([^)]+\)/g, '#00f0ff');
                   }
                 }
-              }
-            }
-
-            // 3. REMOVE all other style and link tags to prevent html2canvas from parsing them
-            // This is the key to avoiding the oklab parsing error
-            const styles = clonedDoc.getElementsByTagName('style');
-            const links = clonedDoc.getElementsByTagName('link');
-            
-            // Remove all links (stylesheets)
-            for (let i = links.length - 1; i >= 0; i--) {
-              if (links[i].rel === 'stylesheet') {
-                links[i].parentNode?.removeChild(links[i]);
-              }
-            }
-            
-            // Remove all styles except the one we just added
-            for (let i = styles.length - 1; i >= 0; i--) {
-              if (styles[i] !== style) {
-                styles[i].parentNode?.removeChild(styles[i]);
               }
             }
           }
@@ -367,17 +355,17 @@ export default function DashboardPage() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 overflow-y-auto"
           >
-            <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 items-start lg:items-center">
+            <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 items-start lg:items-center">
               
               {/* Preview Area */}
-              <div className="lg:col-span-2 flex items-center justify-center overflow-hidden min-h-[400px] md:min-h-[600px]">
+              <div className="lg:col-span-2 flex items-center justify-center overflow-hidden min-h-[300px] md:min-h-[600px] py-4 md:py-0">
                 <motion.div 
                   ref={storyRef}
                   id="story-preview-container"
                   className="w-[1080px] h-[1920px] bg-[#030305] flex flex-col items-center justify-center relative overflow-hidden shrink-0"
                   style={{ 
                     background: storyConfig.bg,
-                    transform: isMobile ? "scale(0.18)" : "scale(0.35)", 
+                    transform: isMobile ? "scale(0.15)" : "scale(0.35)", 
                     transformOrigin: "center center"
                   }}
                 >
