@@ -227,59 +227,45 @@ export default function DashboardPage() {
           useCORS: true,
           logging: false,
           allowTaint: true,
+          windowWidth: 1080,
+          windowHeight: 1920,
           onclone: (clonedDoc: Document) => {
             const el = clonedDoc.getElementById("story-preview-container");
             if (el) {
-              // 1. Reset transform and force dimensions for 1:1 capture
+              // 1. Force absolute dimensions and reset transforms
               el.style.transform = "none";
               el.style.width = "1080px";
               el.style.height = "1920px";
-              el.style.position = "fixed";
-              el.style.top = "0";
-              el.style.left = "0";
               el.style.display = "flex";
               el.style.flexDirection = "column";
               el.style.alignItems = "center";
               el.style.justifyContent = "center";
-              el.style.zIndex = "9999";
+              el.style.margin = "0";
+              el.style.padding = "0";
 
-              // 2. Force the card container to be exactly 800px wide
-              const cardContainer = el.querySelector('.relative.z-10') as HTMLElement;
+              // 2. Force the card container width
+              const cardContainer = el.querySelector('.z-10.flex.flex-col.items-center') as HTMLElement;
               if (cardContainer) {
                 cardContainer.style.width = "800px";
-                cardContainer.style.maxWidth = "800px";
                 cardContainer.style.minWidth = "800px";
+                cardContainer.style.maxWidth = "800px";
               }
 
-              // 3. CRITICAL: Remove all <link> tags to prevent oklab parsing errors from external CSS
-              const links = clonedDoc.getElementsByTagName('link');
-              while (links[0]) links[0].parentNode?.removeChild(links[0]);
-
-              // 4. Sanitize all <style> tags to remove oklab/oklch
-              const styleTags = clonedDoc.getElementsByTagName('style');
-              for (let i = 0; i < styleTags.length; i++) {
-                try {
-                  styleTags[i].innerHTML = styleTags[i].innerHTML
-                    .replace(/oklch\([^)]+\)/g, '#ffffff')
-                    .replace(/oklab\([^)]+\)/g, '#ffffff');
-                } catch (e) { /* ignore */ }
-              }
-
-              // 5. Sanitize all elements and fix backdrop-filter
+              // 3. Deep Sanitization of ALL elements
               const allElements = el.getElementsByTagName('*');
               for (let i = 0; i < allElements.length; i++) {
                 const item = allElements[i] as HTMLElement;
                 
-                // Fix backdrop-filter
-                if (item.style.backdropFilter || (item.style as any).webkitBackdropFilter) {
-                  item.style.backdropFilter = "none";
-                  (item.style as any).webkitBackdropFilter = "none";
-                  if (item.classList.contains('glass') || item.style.backgroundColor.includes('rgba')) {
-                    item.style.backgroundColor = "rgba(10, 10, 12, 0.95)";
-                  }
+                // Remove backdrop-filter (the main culprit)
+                item.style.backdropFilter = "none";
+                (item.style as any).webkitBackdropFilter = "none";
+
+                // Fix glass cards background
+                if (item.classList.contains('glass') || (item.style.backgroundColor && item.style.backgroundColor.includes('rgba'))) {
+                  item.style.backgroundColor = "rgba(10, 10, 12, 0.95)";
                 }
 
-                // Strip oklch/oklab from inline styles
+                // Sanitize inline styles for oklab/oklch
                 const inlineStyle = item.getAttribute('style');
                 if (inlineStyle && (inlineStyle.includes('oklch') || inlineStyle.includes('oklab'))) {
                   const cleanStyle = inlineStyle
@@ -287,6 +273,10 @@ export default function DashboardPage() {
                     .replace(/oklab\([^)]+\)/g, '#ffffff');
                   item.setAttribute('style', cleanStyle);
                 }
+
+                // Force standard colors for text
+                if (item.classList.contains('text-white')) item.style.color = "#ffffff";
+                if (item.classList.contains('text-primary')) item.style.color = "#00f0ff";
               }
             }
           }
