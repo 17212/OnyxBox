@@ -230,27 +230,32 @@ export default function DashboardPage() {
           onclone: (clonedDoc: Document) => {
             const el = clonedDoc.getElementById("story-preview-container");
             if (el) {
-              // 1. Remove scale transform for capture
-              el.style.transform = "none";
-              el.style.position = "fixed";
-              el.style.top = "0";
-              el.style.left = "0";
-              
-              // 2. Aggressively clean styles to avoid oklab/oklch errors
-              const allElements = clonedDoc.getElementsByTagName('*');
+              // 1. Remove ALL external stylesheets and style tags to prevent parsing errors
+              const styles = clonedDoc.getElementsByTagName('style');
+              const links = clonedDoc.getElementsByTagName('link');
+              while (styles[0]) styles[0].parentNode?.removeChild(styles[0]);
+              while (links[0]) links[0].parentNode?.removeChild(links[0]);
+
+              // 2. Inject a SAFE, minimal stylesheet for the story
+              const safeStyle = clonedDoc.createElement('style');
+              safeStyle.innerHTML = `
+                * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+                #story-preview-container { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 1080px; height: 1920px; position: fixed; top: 0; left: 0; transform: none !important; }
+                .glass { background: rgba(10, 10, 12, 0.95) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+                .text-white { color: #ffffff !important; }
+                .text-primary { color: #00f0ff !important; }
+                .font-bold { font-weight: bold !important; }
+                .tracking-tighter { letter-spacing: -0.05em !important; }
+                .uppercase { text-transform: uppercase !important; }
+              `;
+              clonedDoc.head.appendChild(safeStyle);
+
+              // 3. Recursive cleanup of ALL elements
+              const allElements = el.getElementsByTagName('*');
               for (let i = 0; i < allElements.length; i++) {
                 const item = allElements[i] as HTMLElement;
                 
-                // Fix backdrop-filter
-                if (item.style.backdropFilter || (item.style as any).webkitBackdropFilter) {
-                  item.style.backdropFilter = "none";
-                  (item.style as any).webkitBackdropFilter = "none";
-                  if (item.classList.contains('glass')) {
-                    item.style.backgroundColor = "rgba(10, 10, 12, 0.95)";
-                  }
-                }
-
-                // Strip oklch/oklab from inline styles which crash html2canvas
+                // Remove any inline style that might contain oklab/oklch
                 const inlineStyle = item.getAttribute('style');
                 if (inlineStyle && (inlineStyle.includes('oklch') || inlineStyle.includes('oklab'))) {
                   const cleanStyle = inlineStyle
@@ -259,9 +264,9 @@ export default function DashboardPage() {
                   item.setAttribute('style', cleanStyle);
                 }
 
-                // Force standard colors for common classes
-                if (item.classList.contains('text-white')) item.style.color = "#ffffff";
-                if (item.classList.contains('text-primary')) item.style.color = "#00f0ff";
+                // Force reset backdrop-filter again just in case
+                item.style.backdropFilter = "none";
+                (item.style as any).webkitBackdropFilter = "none";
               }
             }
           }
