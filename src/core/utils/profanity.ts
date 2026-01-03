@@ -62,23 +62,36 @@ export const PROFANITY_LIST = [
  */
 export const hasProfanity = (text: string): boolean => {
   const lowerText = text.toLowerCase();
-  return PROFANITY_LIST.some(word => {
-    // Check for exact word or if it's part of a larger word (with boundaries)
-    const regex = new RegExp(`\\b${word}\\b|${word}`, "i");
-    return regex.test(lowerText);
+  
+  // Split text into words and check each word
+  const words = lowerText.split(/[\s\.\,!\?\(\)\[\]\{\}\\\/\-_]+/);
+  
+  return PROFANITY_LIST.some(badWord => {
+    const lowerBadWord = badWord.toLowerCase();
+    
+    // If the bad word is short (less than 3 chars), only match exact word
+    if (lowerBadWord.length <= 3) {
+      return words.includes(lowerBadWord);
+    }
+    
+    // For longer words, check if it's included as a whole word or a significant part
+    // Using a safer regex that doesn't match inside innocent words easily
+    return words.some(word => word === lowerBadWord || (word.length > 4 && word.includes(lowerBadWord)));
   });
 };
 
 /**
  * Cleans the text by replacing profanity with asterisks.
- * @param text The text to clean
- * @returns string
  */
 export const cleanText = (text: string): string => {
   let cleaned = text;
-  PROFANITY_LIST.forEach(word => {
-    const regex = new RegExp(word, "gi");
-    cleaned = cleaned.replace(regex, "*".repeat(word.length));
+  const words = text.split(/\s+/);
+  
+  words.forEach(word => {
+    if (hasProfanity(word)) {
+      const regex = new RegExp(word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "gi");
+      cleaned = cleaned.replace(regex, "*".repeat(word.length));
+    }
   });
   return cleaned;
 };
@@ -87,10 +100,18 @@ export const cleanText = (text: string): string => {
  * Advanced check that handles spaces and common bypass techniques.
  */
 export const isToxic = (text: string): boolean => {
-  // Remove spaces and special characters to catch "ك س م ك"
-  const normalized = text.replace(/[\s\._\-\*]/g, "");
-  if (hasProfanity(normalized)) return true;
+  if (!text) return false;
   
-  // Standard check
-  return hasProfanity(text);
+  // Standard check first
+  if (hasProfanity(text)) return true;
+  
+  // Check for common bypasses like "ك س م ك"
+  // Only do this for longer strings to avoid false positives on short names
+  if (text.length > 5) {
+    const normalized = text.replace(/[\s\._\-\*]/g, "");
+    // Only trigger if the normalized version matches a long bad word
+    return PROFANITY_LIST.some(badWord => badWord.length > 4 && normalized.includes(badWord.toLowerCase()));
+  }
+  
+  return false;
 };
