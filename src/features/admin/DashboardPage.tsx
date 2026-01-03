@@ -243,12 +243,13 @@ export default function DashboardPage() {
               el.style.margin = "0";
               el.style.padding = "0";
 
-              // 2. Force the card container width
-              const cardContainer = el.querySelector('.z-10.flex.flex-col.items-center') as HTMLElement;
-              if (cardContainer) {
-                cardContainer.style.width = "800px";
-                cardContainer.style.minWidth = "800px";
-                cardContainer.style.maxWidth = "800px";
+              // 2. Force the card container width using the new ID
+              const cardWrapper = clonedDoc.getElementById("story-card-wrapper");
+              if (cardWrapper) {
+                cardWrapper.style.width = "800px";
+                cardWrapper.style.minWidth = "800px";
+                cardWrapper.style.maxWidth = "800px";
+                cardWrapper.style.flexShrink = "0";
               }
 
               // 3. Deep Sanitization of ALL elements
@@ -277,6 +278,16 @@ export default function DashboardPage() {
                 // Force standard colors for text
                 if (item.classList.contains('text-white')) item.style.color = "#ffffff";
                 if (item.classList.contains('text-primary')) item.style.color = "#00f0ff";
+              }
+
+              // 4. Sanitize all <style> tags in the clone to prevent oklab parsing errors
+              const styleTags = clonedDoc.getElementsByTagName('style');
+              for (let i = 0; i < styleTags.length; i++) {
+                try {
+                  styleTags[i].innerHTML = styleTags[i].innerHTML
+                    .replace(/oklch\([^)]+\)/g, '#ffffff')
+                    .replace(/oklab\([^)]+\)/g, '#ffffff');
+                } catch (e) { /* ignore */ }
               }
             }
           }
@@ -373,7 +384,7 @@ export default function DashboardPage() {
                     }}
                   />
                   
-                  <div className="relative w-[800px] z-10 flex flex-col items-center">
+                  <div id="story-card-wrapper" className="relative w-[800px] z-10 flex flex-col items-center">
                     {/* Main Card */}
                     <div 
                       className="w-full relative overflow-hidden"
