@@ -271,7 +271,9 @@ export default function DashboardPage() {
                 if (inlineStyle && (inlineStyle.includes('oklch') || inlineStyle.includes('oklab'))) {
                   const cleanStyle = inlineStyle
                     .replace(/oklch\([^)]+\)/g, '#ffffff')
-                    .replace(/oklab\([^)]+\)/g, '#ffffff');
+                    .replace(/oklab\([^)]+\)/g, '#ffffff')
+                    .replace(/oklch\s*\([^)]+\)/g, '#ffffff')
+                    .replace(/oklab\s*\([^)]+\)/g, '#ffffff');
                   item.setAttribute('style', cleanStyle);
                 }
 
@@ -280,13 +282,29 @@ export default function DashboardPage() {
                 if (item.classList.contains('text-primary')) item.style.color = "#00f0ff";
               }
 
-              // 4. Sanitize all <style> tags in the clone to prevent oklab parsing errors
-              const styleTags = clonedDoc.getElementsByTagName('style');
-              for (let i = 0; i < styleTags.length; i++) {
+              // 4. Sanitize all <style> tags in the clone
+              const styleTags = Array.from(clonedDoc.getElementsByTagName('style'));
+              styleTags.forEach(tag => {
                 try {
-                  styleTags[i].innerHTML = styleTags[i].innerHTML
-                    .replace(/oklch\([^)]+\)/g, '#ffffff')
-                    .replace(/oklab\([^)]+\)/g, '#ffffff');
+                  if (tag.innerHTML) {
+                    tag.innerHTML = tag.innerHTML
+                      .replace(/oklch\([^)]+\)/g, '#ffffff')
+                      .replace(/oklab\([^)]+\)/g, '#ffffff')
+                      .replace(/oklch\s*\([^)]+\)/g, '#ffffff')
+                      .replace(/oklab\s*\([^)]+\)/g, '#ffffff');
+                  }
+                } catch (e) { /* ignore */ }
+              });
+
+              // 5. Sanitize the entire head to catch any other sources
+              if (clonedDoc.head) {
+                try {
+                  const headHtml = clonedDoc.head.innerHTML;
+                  if (headHtml.includes('oklch') || headHtml.includes('oklab')) {
+                    clonedDoc.head.innerHTML = headHtml
+                      .replace(/oklch\([^)]+\)/g, '#ffffff')
+                      .replace(/oklab\([^)]+\)/g, '#ffffff');
+                  }
                 } catch (e) { /* ignore */ }
               }
             }
