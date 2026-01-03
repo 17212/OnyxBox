@@ -11,7 +11,6 @@ import AnimatedBackground from "@/shared/components/AnimatedBackground";
 import { Trash2, LogOut, Share2, Check, Eye, EyeOff, Search, Download, Shield, Inbox, User, Clock, Palette, Type, Layout, Sparkles, Heart, MessageCircle, Pin, Star, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { arEG } from "date-fns/locale";
-import html2canvas from "html2canvas";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import StatsWidget from "@/features/admin/StatsWidget";
@@ -216,95 +215,31 @@ export default function DashboardPage() {
     setIsCustomizing(true);
     playSound("click");
   };
-
   const downloadStory = async () => {
     if (storyRef.current) {
       try {
         toast.info("جاري تحضير الصورة...");
-        const canvas = await html2canvas(storyRef.current, {
-          backgroundColor: "#030305",
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          allowTaint: true,
-          windowWidth: 1080,
-          windowHeight: 1920,
-          onclone: (clonedDoc: Document) => {
-            const el = clonedDoc.getElementById("story-preview-container");
-            if (el) {
-              // 1. Force absolute dimensions and reset transforms
-              el.style.transform = "none";
-              el.style.width = "1080px";
-              el.style.height = "1920px";
-              el.style.display = "flex";
-              el.style.flexDirection = "column";
-              el.style.alignItems = "center";
-              el.style.justifyContent = "center";
-              el.style.margin = "0";
-              el.style.padding = "0";
-
-              // 2. Force the card container width using the new ID
-              const cardWrapper = clonedDoc.getElementById("story-card-wrapper");
-              if (cardWrapper) {
-                cardWrapper.style.width = "800px";
-                cardWrapper.style.minWidth = "800px";
-                cardWrapper.style.maxWidth = "800px";
-                cardWrapper.style.flexShrink = "0";
-              }
-
-              // 3. Deep Sanitization of ALL elements in the entire document
-              const allElements = clonedDoc.getElementsByTagName('*');
-              for (let i = 0; i < allElements.length; i++) {
-                const item = allElements[i] as HTMLElement;
-                
-                // Remove backdrop-filter (the main culprit)
-                item.style.backdropFilter = "none";
-                (item.style as any).webkitBackdropFilter = "none";
-
-                // Fix glass cards background
-                if (item.classList.contains('glass') || (item.style.backgroundColor && (item.style.backgroundColor.includes('rgba') || item.style.backgroundColor.includes('okl')))) {
-                  item.style.backgroundColor = "rgba(10, 10, 12, 0.95)";
-                }
-
-                // Sanitize all attributes for oklab/oklch/lab/lch/hwb/color
-                const attrs = item.attributes;
-                for (let j = 0; j < attrs.length; j++) {
-                  const attr = attrs[j];
-                  if (attr.value && (attr.value.includes('okl') || attr.value.includes('lab') || attr.value.includes('lch') || attr.value.includes('hwb') || attr.value.includes('color('))) {
-                    attr.value = attr.value.replace(/(oklch|oklab|lab|lch|hwb|color)\s*\([^)]+\)/g, '#ffffff');
-                  }
-                }
-
-                // Force standard colors for text
-                if (item.classList.contains('text-white')) item.style.color = "#ffffff";
-                if (item.classList.contains('text-primary')) item.style.color = "#00f0ff";
-              }
-
-              // 4. Sanitize all <style> tags in the clone
-              const styleTags = Array.from(clonedDoc.getElementsByTagName('style'));
-              styleTags.forEach(tag => {
-                try {
-                  if (tag.innerHTML) {
-                    tag.innerHTML = tag.innerHTML.replace(/(oklch|oklab|lab|lch|hwb|color)\s*\([^)]+\)/g, '#ffffff');
-                  }
-                } catch (e) { /* ignore */ }
-              });
-
-              // 5. Sanitize the entire head and body HTML as a fallback
-              try {
-                if (clonedDoc.head) {
-                  clonedDoc.head.innerHTML = clonedDoc.head.innerHTML.replace(/(oklch|oklab|lab|lch|hwb|color)\s*\([^)]+\)/g, '#ffffff');
-                }
-                // Note: We don't sanitize body.innerHTML directly to avoid breaking the DOM structure/references
-              } catch (e) { /* ignore */ }
-            }
-          }
+        
+        // Import html-to-image dynamically to avoid SSR issues
+        const { toPng } = await import("html-to-image");
+        
+        const dataUrl = await toPng(storyRef.current, {
+          quality: 1,
+          pixelRatio: 2,
+          width: 1080,
+          height: 1920,
+          style: {
+            transform: "scale(1)",
+            transformOrigin: "top left",
+          },
+          cacheBust: true,
         });
-        const image = canvas.toDataURL("image/png");
+
         const link = document.createElement("a");
-        link.href = image;
+        link.href = dataUrl;
         link.download = `onyxbox-story-${storyMessage?.id}.png`;
         link.click();
+        
         toast.success("تم إنشاء الستوري بنجاح! 📸");
         playSound("success");
         setIsCustomizing(false);
