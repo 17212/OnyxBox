@@ -22,6 +22,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { playSound, vibrate } from "@/core/utils/sound";
 import AboutModal from "@/shared/components/AboutModal";
 import { AR, MOODS, timeAgo } from "@/core/constants";
+import { isToxic } from "@/core/utils/profanity";
 
 const TypewriterText = ({ text }: { text: string }) => {
   const [displayedText, setDisplayedText] = useState("");
@@ -130,6 +131,7 @@ export default function LandingPage() {
     }
   };
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || !user) return;
@@ -137,6 +139,17 @@ export default function LandingPage() {
     if (cooldown) {
       playSound("error");
       toast.error(AR.errors.rateLimit);
+      return;
+    }
+
+    // --- Profanity Check ---
+    if (isToxic(message) || isToxic(senderName)) {
+      playSound("error");
+      toast.error("عيب يا بطل.. خليك محترم في كلامك! 🚫", {
+        icon: "🤫",
+        style: { background: "#000", color: "#fff", border: "1px solid #ff0000" }
+      });
+      vibrate([100, 50, 100]);
       return;
     }
 

@@ -23,49 +23,49 @@ export const ADMIN_REACTIONS = ["❤️", "😂", "🔥", "👀", "🥺", "💀"
 export const AR = {
   // === BRANDING ===
   appName: "OnyxBox",
-  tagline: "بعتلي رسالتك بسرية تامة.. مش هعرف انت مين 👻",
-  poweredBy: "اتعمل بـ",
+  tagline: "ابعت رسالتك مش هعرف انت مين متقلقش الا لو انت كتبت اسمك",
+  poweredBy: "Powered by",
 
   // === AUTH SCREEN ===
   auth: {
-    welcome: "يلا ادخل وابعتلي",
-    continueGoogle: "اتدخل بجوجل",
-    continueAnonymous: "ادخل متخفي 👻",
-    continueEmail: "ادخل بالايميل",
+    welcome: "يلا ادخل وابعت رسالتك",
+    continueGoogle: "سجل بجوجل",
+    continueAnonymous: "سجل بشكل متخفي 👻",
+    continueEmail: "سجل بالايميل",
     orDivider: "أو",
     loginButton: "دخّلني",
     signupButton: "سجّلني",
-    emailPlaceholder: "ايميلك يا معلم",
+    emailPlaceholder: "ايميلك يا فنان",
     passwordPlaceholder: "الباسورد",
     switchToSignup: "معندكش أكونت؟ يلا اعمل واحد",
     switchToLogin: "عندك أكونت؟ دخّل بقى",
     loginSuccess: "دخلت يا باشا! 🎉",
-    loginFailed: "مدخلش.. جرب تاني",
-    signupSuccess: "اتسجّلت! يلا نبدأ 🚀",
-    anonymousSuccess: "دخلت متخفي زي النينجا 🥷",
+    loginFailed: "مظبطش.. جرب تاني",
+    signupSuccess: "اتسجّلت!",
+    anonymousSuccess: "دخلت متخفي 🥷",
   },
 
   // === MESSAGE FORM ===
   form: {
-    placeholder: "اكتب اللي في بالك.. مش هحكي لحد 🤫",
-    namePlaceholder: "اسمك (اختياري.. أو خليك مجهول)",
+    placeholder: "اكتب كل اللي في بالك..",
+    namePlaceholder: "اسمك (اختياري.. أو خليك مجهول عادي)",
     sendButton: "ابعت",
     sending: "بيتبعت...",
-    cooldownWarning: "استنى شوية قبل ما تبعت تاني 😅",
+    cooldownWarning: "استنى شوية قبل ما تبعت تاني",
     emptyWarning: "اكتب حاجة الأول يا زعيم!",
-    successMessage: "وصلتني رسالتك! 🎉",
+    successMessage: "وصلتني رسالتك!",
     errorMessage: "في مشكلة.. جرب تاني",
     characterCount: "حرف",
-    moodLabel: "حاسس بإيه؟",
+    moodLabel: "حاسس بإيه مثلا؟",
   },
 
   // === SUCCESS SCREEN ===
   success: {
-    title: "وصلت! 🎉",
-    subtitle: "رسالتك دي بيني وبينك.. سرّك في بير 🔒",
+    title: "وصلت!",
+    subtitle: "رسالتك دي بيني وبينك.. 🔒",
     sendAnother: "عايز تبعت تاني؟",
     notification: "هيوصلك إشعار لما أقرأها 👀",
-    waitingForReaction: "مستني إدريس يشوفها... 👀",
+    waitingForReaction: "استنى إدريس يشوفها... 👀",
   },
 
   // === REAL-TIME NOTIFICATIONS ===
@@ -133,24 +133,24 @@ export const AR = {
     title: "مين اللي عمل الموقع ده؟",
     developer: "المطوّر",
     description: "Lead Developer & Architect at IDRISIUM Corp. Obsessed with creating pixel-perfect, high-performance digital experiences.",
-    contact: "اتواصل معايا",
+    contact: "التواصل",
     security: "مؤمّن بتقنية IDRISIUM",
-    footer: "Powered by IDRISIUM Security",
+    footer: "Powered by IDRISIUM Corp",
   },
 
   // === FOOTER ===
   footer: {
     madeWith: "اتعمل بـ",
-    byIdrisium: "IDRISIUM",
+    byIdrisium: "IDRISIUM Corp",
   },
 
   // === ERRORS ===
   errors: {
     generic: "في حاجة غلط.. جرب تاني",
     network: "النت واقع ولا إيه؟ 📡",
-    auth: "مش قادر أدخّلك.. جرب تاني",
+    auth: "السيرفر مش قابل أدخّلك.. جرب تاني",
     permission: "مش مسموحلك تعمل كده 🚫",
-    rateLimit: "بتبعت كتير أوي! استنى شوية 😅",
+    rateLimit: "بتبعت كتير أوي! استنى شوية",
   },
 
   // === LOADING STATES ===
