@@ -76,7 +76,11 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                   className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-primary to-secondary p-[2px] mb-6 shadow-[0_0_40px_rgba(0,240,255,0.3)]"
                 >
                   <div className="w-full h-full rounded-[22px] bg-[#030305] flex items-center justify-center overflow-hidden">
-                    <span className="text-4xl font-bold text-white tracking-tighter">IG</span>
+                    <img 
+                      src="/idrisIMAGE.png" 
+                      alt="Idris Ghamid" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </motion.div>
 

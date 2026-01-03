@@ -51,22 +51,36 @@ export default function DashboardPage() {
     accentColor: "#00f0ff",
     fontSize: "text-2xl",
     textAlign: "text-center" as "text-left" | "text-center" | "text-right",
-    borderRadius: "rounded-3xl",
-    cardStyle: "glass" as "glass" | "solid" | "neon",
+    borderRadius: "24px",
+    cardStyle: "glass" as "glass" | "solid" | "neon" | "minimal",
     moodSize: "text-6xl",
-    glowEffect: true
+    glowEffect: true,
+    padding: "40px",
+    showLink: true,
+    linkGlow: true,
+    overlayOpacity: 0.4,
+    fontFamily: "font-sans",
   });
 
   const BACKGROUNDS = [
-    { name: "Onyx", value: "linear-gradient(to bottom, transparent, rgba(3, 3, 5, 0.5), #030305)" },
-    { name: "Sunset", value: "linear-gradient(to bottom right, rgba(249, 115, 22, 0.2), rgba(168, 85, 247, 0.2), #030305)" },
-    { name: "Ocean", value: "linear-gradient(to bottom right, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.2), #030305)" },
-    { name: "Neon", value: "linear-gradient(to bottom right, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2), #030305)" },
-    { name: "Emerald", value: "linear-gradient(to bottom right, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1), #030305)" },
-    { name: "Royal", value: "linear-gradient(to bottom right, rgba(109, 40, 217, 0.2), rgba(124, 58, 237, 0.1), #030305)" },
+    { name: "Onyx", value: "linear-gradient(180deg, #030305 0%, #0a0a0c 100%)" },
+    { name: "Midnight", value: "linear-gradient(135deg, #0f172a 0%, #020617 100%)" },
+    { name: "Deep Sea", value: "linear-gradient(135deg, #083344 0%, #020617 100%)" },
+    { name: "Purple Rain", value: "linear-gradient(135deg, #4c1d95 0%, #020617 100%)" },
+    { name: "Rose Gold", value: "linear-gradient(135deg, #881337 0%, #020617 100%)" },
+    { name: "Forest", value: "linear-gradient(135deg, #064e3b 0%, #020617 100%)" },
+    { name: "Cyberpunk", value: "linear-gradient(135deg, #70123e 0%, #0f172a 100%)" },
+    { name: "Aurora", value: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%)" },
+    { name: "Carbon", value: "linear-gradient(135deg, #111111 0%, #000000 100%)" },
   ];
 
-  const ACCENTS = ["#00f0ff", "#ff00e5", "#7000ff", "#00ff88", "#ffbb00"];
+  const ACCENTS = ["#00f0ff", "#ff00e5", "#7000ff", "#00ff88", "#ffbb00", "#ffffff", "#ff4d4d"];
+  
+  const FONTS = [
+    { name: "Sans", value: "font-sans" },
+    { name: "Serif", value: "font-serif" },
+    { name: "Mono", value: "font-mono" },
+  ];
 
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged((u: FirebaseUser | null) => {
@@ -258,126 +272,153 @@ export default function DashboardPage() {
               <div className="lg:col-span-2 flex items-center justify-center">
                 <motion.div 
                   ref={storyRef}
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className={`w-full max-w-[400px] aspect-[9/16] bg-[#030305] relative overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center p-6 md:p-8`}
+                  className="w-[1080px] h-[1920px] bg-[#030305] flex flex-col items-center justify-center relative overflow-hidden shrink-0"
+                  style={{ 
+                    background: storyConfig.bg,
+                    transform: "scale(0.35)", // Scale down for preview
+                    transformOrigin: "center center"
+                  }}
                 >
-                  {/* Background Layer */}
-                  <div className="absolute inset-0" style={{ background: storyConfig.bg }}></div>
+                  {/* Decorative Elements */}
+                  <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" 
+                    style={{ 
+                      backgroundImage: "radial-gradient(circle at 20% 20%, #ffffff 1px, transparent 1px)",
+                      backgroundSize: "60px 60px"
+                    }} 
+                  />
                   
-                  {/* Noise Overlay */}
-                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
-
-                  <div className="relative z-10 w-full">
+                  <div className="relative w-[800px] z-10 flex flex-col items-center">
+                    {/* Main Card */}
                     <div 
-                      className={`
-                        ${storyConfig.borderRadius} p-8 relative overflow-hidden transition-all duration-500
-                        ${storyConfig.cardStyle === 'glass' ? 'bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl' : ''}
-                        ${storyConfig.cardStyle === 'solid' ? 'bg-black/40 border border-white/5 shadow-xl' : ''}
-                        ${storyConfig.cardStyle === 'neon' ? 'bg-black/60 border-2 shadow-[0_0_30px_rgba(0,240,255,0.2)]' : ''}
-                      `}
+                      className="w-full relative overflow-hidden"
                       style={{ 
-                        borderColor: storyConfig.cardStyle === 'neon' ? storyConfig.accentColor : undefined,
-                        boxShadow: storyConfig.cardStyle === 'neon' ? `0 0 40px ${storyConfig.accentColor}22` : undefined
+                        padding: storyConfig.padding,
+                        borderRadius: storyConfig.borderRadius,
+                        backgroundColor: storyConfig.cardStyle === "solid" ? "#0a0a0c" : "rgba(255, 255, 255, 0.03)",
+                        border: storyConfig.cardStyle === "neon" ? `2px solid ${storyConfig.accentColor}` : "1px solid rgba(255, 255, 255, 0.1)",
+                        boxShadow: storyConfig.cardStyle === "neon" ? `0 0 40px ${storyConfig.accentColor}44` : "0 20px 50px rgba(0,0,0,0.5)",
+                        backdropFilter: storyConfig.cardStyle === "glass" ? "blur(30px)" : "none",
                       }}
                     >
-                      {/* Accent Line */}
-                      <div className="absolute top-0 left-0 w-full h-1" style={{ background: `linear-gradient(to right, ${storyConfig.accentColor}, #7000ff)` }}></div>
-                      
-                      <div className="flex justify-center mb-6">
-                        <h1 className="text-3xl font-bold tracking-tighter text-white">
-                          onyx<span style={{ color: storyConfig.accentColor }}>box</span>
-                        </h1>
-                      </div>
-   
-                      <div className="text-center mb-6">
+                      {/* Card Header */}
+                      <div className="flex flex-col items-center mb-12">
+                        <div className="flex items-center gap-4 mb-8">
+                          <span className="text-5xl font-black text-white tracking-tighter uppercase">onyx</span>
+                          <span className="text-5xl font-black tracking-tighter uppercase" style={{ color: storyConfig.accentColor }}>box</span>
+                        </div>
+                        
                         <motion.span 
-                          animate={{ y: [0, -10, 0] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                          className={`${storyConfig.moodSize} inline-block`}
+                          className={`${storyConfig.moodSize} block mb-4`}
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ repeat: Infinity, duration: 2 }}
                         >
                           {storyMessage.mood || "👻"}
                         </motion.span>
                       </div>
    
+                      {/* Message Content */}
                       <p 
                         className={`
-                          ${storyConfig.fontSize} ${storyConfig.textAlign} font-medium leading-relaxed ${storyConfig.font} text-white
-                          ${storyConfig.glowEffect ? 'drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]' : ''}
+                          ${storyConfig.fontSize} ${storyConfig.textAlign} font-bold leading-[1.6] ${storyConfig.fontFamily} text-white
+                          ${storyConfig.glowEffect ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]' : ''}
                         `}
-                        style={{ direction: "rtl" }}
+                        style={{ 
+                          direction: "rtl",
+                          fontSize: storyConfig.fontSize === "text-xl" ? "40px" : 
+                                    storyConfig.fontSize === "text-2xl" ? "56px" : 
+                                    storyConfig.fontSize === "text-3xl" ? "72px" : "88px"
+                        }}
                       >
                         "{storyMessage.content}"
                       </p>
 
-                      <div className="mt-8 flex flex-col items-center gap-4">
+                      {/* Card Footer */}
+                      <div className="mt-16 flex flex-col items-center gap-8">
                         {storyConfig.showSender && (
-                          <div className="flex items-center gap-2 text-white/60">
-                            <User className="w-4 h-4" style={{ color: storyConfig.accentColor }} />
-                            <span className="text-sm font-medium">{storyMessage.senderName || "Anonymous"}</span>
+                          <div className="flex items-center gap-3 text-white/70">
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: storyConfig.accentColor }} />
+                            <span className="text-3xl font-bold tracking-tight">{storyMessage.senderName || "Anonymous"}</span>
                           </div>
                         )}
 
                         {storyConfig.showTimestamp && (
-                          <div className="flex items-center gap-2 text-white/40">
-                            <Clock className="w-3 h-3" />
-                            <span className="text-[10px] uppercase tracking-widest">
+                          <div className="flex items-center gap-3 text-white/40">
+                            <span className="text-xl font-mono uppercase tracking-[0.3em]">
                               {storyMessage.timestamp?.seconds
-                                ? format(new Date(storyMessage.timestamp.seconds * 1000), "PPpp", { locale: arEG })
+                                ? format(new Date(storyMessage.timestamp.seconds * 1000), "d MMM yyyy • h:mm a", { locale: arEG })
                                 : "Just now"}
                             </span>
                           </div>
                         )}
 
-                        {storyConfig.showBadge && (
-                          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10">
-                            <Shield className="w-3 h-3" style={{ color: storyConfig.accentColor }} />
-                            <span className="text-[10px] font-mono text-white/60 uppercase tracking-tighter">Verified Secret</span>
+                        {storyConfig.showLink && (
+                          <div 
+                            className="mt-4 px-8 py-3 rounded-2xl border transition-all"
+                            style={{ 
+                              backgroundColor: "rgba(255, 255, 255, 0.05)",
+                              borderColor: storyConfig.linkGlow ? storyConfig.accentColor : "rgba(255, 255, 255, 0.1)",
+                              boxShadow: storyConfig.linkGlow ? `0 0 30px ${storyConfig.accentColor}33` : "none"
+                            }}
+                          >
+                            <span 
+                              className="text-2xl font-black tracking-[0.1em] uppercase"
+                              style={{ color: storyConfig.linkGlow ? storyConfig.accentColor : "#ffffff" }}
+                            >
+                              idrisium.linkpc.net
+                            </span>
                           </div>
                         )}
                       </div>
                     </div>
                     
-                    <div className="mt-12 text-center">
-                      <p className="text-sm font-light tracking-[0.8em] text-white/30 uppercase">Send me a secret</p>
+                    <div className="mt-20 text-center">
+                      <p className="text-2xl font-black tracking-[1em] text-white/20 uppercase">Send me a secret</p>
                     </div>
                   </div>
                 </motion.div>
               </div>
 
               {/* Controls Area */}
-              <GlassCard className="h-fit space-y-6 overflow-y-auto max-h-[90vh] p-8 border-white/10">
+              <GlassCard className="h-fit space-y-6 overflow-y-auto max-h-[90vh] p-8 border-white/10 custom-scrollbar">
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                  <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    {AR.story.title}
-                  </h2>
+                  <div className="flex flex-col">
+                    <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                      {AR.story.title}
+                    </h2>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Professional Story Lab</p>
+                  </div>
                   <button onClick={() => setIsCustomizing(false)} className="p-2 rounded-full hover:bg-white/5 text-gray-400 hover:text-white transition-all">
                     <LogOut className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {/* Style Section */}
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold flex items-center gap-2">
                       <Layout className="w-3 h-3" /> {AR.story.cardStyle}
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {["glass", "solid", "neon"].map((style) => (
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: "glass", label: "شفاف 💎" },
+                        { id: "solid", label: "مطفي 🌑" },
+                        { id: "neon", label: "نيون ⚡" },
+                        { id: "minimal", label: "بسيط ✨" }
+                      ].map((style) => (
                         <button
-                          key={style}
-                          onClick={() => setStoryConfig({ ...storyConfig, cardStyle: style as any })}
-                          className={`py-2 rounded-lg border text-[10px] capitalize transition-all ${storyConfig.cardStyle === style ? "border-primary text-primary bg-primary/10 shadow-[0_0_15px_rgba(0,240,255,0.1)]" : "border-white/5 text-gray-500 hover:bg-white/5"}`}
+                          key={style.id}
+                          onClick={() => setStoryConfig({ ...storyConfig, cardStyle: style.id as any })}
+                          className={`py-3 rounded-xl border text-xs font-bold transition-all ${storyConfig.cardStyle === style.id ? "border-primary text-primary bg-primary/10 shadow-[0_0_20px_rgba(0,240,255,0.1)]" : "border-white/5 text-gray-500 hover:bg-white/5"}`}
                         >
-                          {style === "glass" ? "شفاف" : style === "solid" ? "مطفي" : "نيون"}
+                          {style.label}
                         </button>
                       ))}
                     </div>
                   </div>
 
                   {/* Background Section */}
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold flex items-center gap-2">
                       <Palette className="w-3 h-3" /> {AR.story.background}
                     </label>
@@ -386,7 +427,7 @@ export default function DashboardPage() {
                         <button
                           key={bg.name}
                           onClick={() => setStoryConfig({ ...storyConfig, bg: bg.value })}
-                          className={`p-2 rounded-lg border text-[10px] transition-all ${storyConfig.bg === bg.value ? "border-primary text-primary bg-primary/10" : "border-white/5 text-gray-500 hover:bg-white/5"}`}
+                          className={`p-3 rounded-xl border text-[10px] font-bold transition-all ${storyConfig.bg === bg.value ? "border-primary text-primary bg-primary/10" : "border-white/5 text-gray-500 hover:bg-white/5"}`}
                         >
                           {bg.name}
                         </button>
@@ -395,30 +436,30 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Accent Color Section */}
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">{AR.story.accentColor}</label>
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-3">
                       {ACCENTS.map((color) => (
                         <button
                           key={color}
                           onClick={() => setStoryConfig({ ...storyConfig, accentColor: color })}
-                          className={`w-8 h-8 rounded-full border-2 transition-transform ${storyConfig.accentColor === color ? "border-white scale-125 shadow-lg" : "border-transparent hover:scale-110"}`}
+                          className={`w-10 h-10 rounded-full border-2 transition-all ${storyConfig.accentColor === color ? "border-white scale-110 shadow-[0_0_20px_rgba(255,255,255,0.3)]" : "border-transparent hover:scale-105"}`}
                           style={{ backgroundColor: color }}
                         />
                       ))}
                     </div>
                   </div>
 
-                  {/* Typography Section */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-3">
+                  {/* Typography & Layout Section */}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-4">
                       <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold flex items-center gap-2">
                         <Type className="w-3 h-3" /> {AR.story.fontSize}
                       </label>
                       <select 
                         value={storyConfig.fontSize}
                         onChange={(e) => setStoryConfig({ ...storyConfig, fontSize: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-primary"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-primary"
                       >
                         <option value="text-xl">صغير</option>
                         <option value="text-2xl">متوسط</option>
@@ -426,58 +467,79 @@ export default function DashboardPage() {
                         <option value="text-4xl">كبير جداً</option>
                       </select>
                     </div>
-                    <div className="space-y-3">
-                      <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">{AR.story.alignment}</label>
-                      <div className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/5">
+                    <div className="space-y-4">
+                      <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">المحاذاة</label>
+                      <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
                         {["text-left", "text-center", "text-right"].map((align) => (
                           <button
                             key={align}
                             onClick={() => setStoryConfig({ ...storyConfig, textAlign: align as any })}
-                            className={`flex-1 py-1.5 rounded-md text-[10px] transition-all ${storyConfig.textAlign === align ? "bg-primary text-black font-bold" : "text-gray-500 hover:text-white"}`}
+                            className={`flex-1 py-2 rounded-lg text-[10px] font-bold transition-all ${storyConfig.textAlign === align ? "bg-primary text-black" : "text-gray-500 hover:text-white"}`}
                           >
-                            {align.split("-")[1].charAt(0).toUpperCase()}
+                            {align === "text-left" ? "L" : align === "text-center" ? "C" : "R"}
                           </button>
                         ))}
                       </div>
                     </div>
                   </div>
 
+                  {/* Advanced Customization */}
+                  <div className="space-y-6 pt-6 border-t border-white/5">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Border Radius</label>
+                        <span className="text-[10px] text-primary font-mono">{storyConfig.borderRadius}</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="100" step="4"
+                        value={parseInt(storyConfig.borderRadius)}
+                        onChange={(e) => setStoryConfig({ ...storyConfig, borderRadius: `${e.target.value}px` })}
+                        className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Padding</label>
+                        <span className="text-[10px] text-primary font-mono">{storyConfig.padding}</span>
+                      </div>
+                      <input 
+                        type="range" min="20" max="120" step="10"
+                        value={parseInt(storyConfig.padding)}
+                        onChange={(e) => setStoryConfig({ ...storyConfig, padding: `${e.target.value}px` })}
+                        className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
                   {/* Toggles Section */}
-                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                      <div className={`w-10 h-5 rounded-full relative transition-colors ${storyConfig.showBadge ? 'bg-primary' : 'bg-white/10'}`}>
-                        <input type="checkbox" checked={storyConfig.showBadge} onChange={(e) => setStoryConfig({ ...storyConfig, showBadge: e.target.checked })} className="sr-only" />
-                        <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${storyConfig.showBadge ? 'translate-x-5' : ''}`} />
-                      </div>
-                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">{AR.story.showBadge}</span>
-                    </label>
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                      <div className={`w-10 h-5 rounded-full relative transition-colors ${storyConfig.showTimestamp ? 'bg-primary' : 'bg-white/10'}`}>
-                        <input type="checkbox" checked={storyConfig.showTimestamp} onChange={(e) => setStoryConfig({ ...storyConfig, showTimestamp: e.target.checked })} className="sr-only" />
-                        <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${storyConfig.showTimestamp ? 'translate-x-5' : ''}`} />
-                      </div>
-                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">{AR.story.showTimestamp}</span>
-                    </label>
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                      <div className={`w-10 h-5 rounded-full relative transition-colors ${storyConfig.showSender ? 'bg-primary' : 'bg-white/10'}`}>
-                        <input type="checkbox" checked={storyConfig.showSender} onChange={(e) => setStoryConfig({ ...storyConfig, showSender: e.target.checked })} className="sr-only" />
-                        <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${storyConfig.showSender ? 'translate-x-5' : ''}`} />
-                      </div>
-                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">{AR.story.showSender}</span>
-                    </label>
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                      <div className={`w-10 h-5 rounded-full relative transition-colors ${storyConfig.glowEffect ? 'bg-primary' : 'bg-white/10'}`}>
-                        <input type="checkbox" checked={storyConfig.glowEffect} onChange={(e) => setStoryConfig({ ...storyConfig, glowEffect: e.target.checked })} className="sr-only" />
-                        <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${storyConfig.glowEffect ? 'translate-x-5' : ''}`} />
-                      </div>
-                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">{AR.story.glowEffect}</span>
-                    </label>
+                  <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/5">
+                    {[
+                      { key: "showSender", label: AR.story.showSender },
+                      { key: "showTimestamp", label: AR.story.showTimestamp },
+                      { key: "showLink", label: "رابط الموقع 🔗" },
+                      { key: "linkGlow", label: "توهج الرابط ✨" },
+                      { key: "glowEffect", label: AR.story.glowEffect },
+                    ].map((toggle) => (
+                      <label key={toggle.key} className="flex items-center gap-3 cursor-pointer group">
+                        <div className={`w-10 h-5 rounded-full relative transition-colors ${(storyConfig as any)[toggle.key] ? 'bg-primary' : 'bg-white/10'}`}>
+                          <input 
+                            type="checkbox" 
+                            checked={(storyConfig as any)[toggle.key]} 
+                            onChange={(e) => setStoryConfig({ ...storyConfig, [toggle.key]: e.target.checked })} 
+                            className="sr-only" 
+                          />
+                          <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${(storyConfig as any)[toggle.key] ? 'translate-x-5' : ''}`} />
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 group-hover:text-white transition-colors">{toggle.label}</span>
+                      </label>
+                    ))}
                   </div>
                 </div>
 
                 <button
                   onClick={downloadStory}
-                  className="w-full py-4 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(0,240,255,0.2)] mt-8"
+                  className="w-full py-5 bg-primary text-black font-black text-sm uppercase tracking-widest rounded-2xl hover:bg-primary/90 transition-all flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(0,240,255,0.3)] mt-10 active:scale-95"
                 >
                   <Download className="w-5 h-5" />
                   {AR.story.download}
