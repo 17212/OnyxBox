@@ -230,77 +230,74 @@ export default function DashboardPage() {
             const el = clonedDoc.getElementById("story-preview-container");
             if (!el) return;
 
-            // 1. COMPLETELY WIPE THE HEAD and replace with safe styles
-            // This is the ultimate fix for the oklab parsing error
-            clonedDoc.head.innerHTML = `
-              <style>
-                * { 
-                  box-sizing: border-box !important;
-                  backdrop-filter: none !important; 
-                  -webkit-backdrop-filter: none !important; 
-                  animation: none !important;
-                  transition: none !important;
-                  text-shadow: none !important;
-                }
-                #story-preview-container {
-                  display: flex !important;
-                  flex-direction: column !important;
-                  align-items: center !important;
-                  justify-content: center !important;
-                  background: ${storyConfig.bg} !important;
-                }
-                .text-white { color: #ffffff !important; }
-                .font-bold { font-weight: 700 !important; }
-                .font-black { font-weight: 900 !important; }
-                .uppercase { text-transform: uppercase !important; }
-              </style>
-            `;
+            // 1. Reset transform and dimensions for full-size capture
+            clonedDoc.body.style.width = "1080px";
+            clonedDoc.body.style.height = "1920px";
+            
+            el.style.transform = "none";
+            el.style.transformOrigin = "top left";
+            el.style.width = "1080px";
+            el.style.height = "1920px";
+            el.style.position = "absolute";
+            el.style.top = "0";
+            el.style.left = "0";
+            el.style.display = "flex";
+            el.style.flexDirection = "column";
+            el.style.alignItems = "center";
+            el.style.justifyContent = "center";
 
-            // 2. Manually inline computed styles from the original document
+            // 2. Inline ALL computed styles for all children
+            // This is the only way to preserve layout after removing stylesheets
             const allCloned = el.getElementsByTagName('*');
             const originalContainer = storyRef.current;
             if (originalContainer) {
               const allOriginal = originalContainer.getElementsByTagName('*');
-              
               for (let i = 0; i < allCloned.length; i++) {
                 const c = allCloned[i] as HTMLElement;
                 const o = allOriginal[i] as HTMLElement;
                 if (o) {
                   const computed = window.getComputedStyle(o);
+                  // Copy essential styles
+                  for (let j = 0; j < computed.length; j++) {
+                    const prop = computed[j];
+                    let val = computed.getPropertyValue(prop);
+                    
+                    // Skip problematic properties
+                    if (prop.includes('backdrop-filter') || prop === 'filter') continue;
+                    
+                    // Fix oklab/oklch colors
+                    if (val.includes('okl')) {
+                      val = "#00f0ff"; 
+                    }
+                    
+                    c.style.setProperty(prop, val);
+                  }
                   
-                  // Copy essential properties manually to ensure they are in RGB/Hex
-                  c.style.color = computed.color;
-                  c.style.backgroundColor = computed.backgroundColor;
-                  c.style.borderColor = computed.borderColor;
-                  c.style.fontSize = computed.fontSize;
-                  c.style.fontWeight = computed.fontWeight;
-                  c.style.fontFamily = computed.fontFamily;
-                  c.style.lineHeight = computed.lineHeight;
-                  c.style.textAlign = computed.textAlign;
-                  c.style.padding = computed.padding;
-                  c.style.margin = computed.margin;
-                  c.style.borderRadius = computed.borderRadius;
-                  c.style.borderWidth = computed.borderWidth;
-                  c.style.borderStyle = computed.borderStyle;
-                  c.style.display = computed.display;
-                  c.style.flexDirection = computed.flexDirection;
-                  c.style.alignItems = computed.alignItems;
-                  c.style.justifyContent = computed.justifyContent;
-                  c.style.gap = computed.gap;
-                  c.style.position = computed.position;
-                  c.style.width = computed.width;
-                  c.style.height = computed.height;
-                  c.style.opacity = computed.opacity;
-                  c.style.boxShadow = computed.boxShadow;
-                  c.style.transform = computed.transform;
-                  
-                  // Extra safety: replace any oklch/oklab strings if they somehow leaked in
-                  if (c.style.cssText.includes('okl')) {
-                    c.style.cssText = c.style.cssText.replace(/(oklch|oklab)\([^)]+\)/g, '#00f0ff');
+                  // Ensure glass cards have a solid background
+                  if (c.classList.contains('glass') || c.classList.contains('glass-card')) {
+                    c.style.backgroundColor = "rgba(10, 10, 12, 0.95)";
                   }
                 }
               }
             }
+
+            // 3. Remove all external stylesheets to avoid oklab parsing errors
+            const links = Array.from(clonedDoc.getElementsByTagName('link'));
+            links.forEach(l => { if (l.rel === 'stylesheet') l.remove(); });
+            
+            // 4. Fix any oklab in internal style tags
+            const styles = Array.from(clonedDoc.getElementsByTagName('style'));
+            styles.forEach(s => {
+              s.innerHTML = s.innerHTML.replace(/(oklch|oklab)\([^)]+\)/g, '#00f0ff');
+            });
+
+            // 5. Add a minimal base style
+            const baseStyle = clonedDoc.createElement('style');
+            baseStyle.innerHTML = `
+              body { background: #030305; margin: 0; padding: 0; overflow: hidden; }
+              * { box-sizing: border-box; }
+            `;
+            clonedDoc.head.appendChild(baseStyle);
           }
         });
         const image = canvas.toDataURL("image/png");
@@ -390,7 +387,7 @@ export default function DashboardPage() {
                   <div 
                     className="absolute inset-0 pointer-events-none z-[2] opacity-[0.05]"
                     style={{ 
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                      backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")',
                       opacity: storyConfig.noiseOpacity
                     }}
                   />
