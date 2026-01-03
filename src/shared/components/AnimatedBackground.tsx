@@ -44,19 +44,21 @@ export default function AnimatedBackground() {
       <motion.div
         animate={{
           rotate: [0, 360],
-          scale: isMobile ? [1, 1.1, 1] : [1, 1.2, 1],
+          scale: isMobile ? [1, 1.05, 1] : [1, 1.2, 1],
         }}
-        transition={{ duration: isMobile ? 45 : 30, repeat: Infinity, ease: "linear" }}
-        className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] bg-primary/10 rounded-full blur-[100px] md:blur-[150px] mix-blend-screen pointer-events-none will-change-transform"
+        transition={{ duration: isMobile ? 60 : 30, repeat: Infinity, ease: "linear" }}
+        className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] bg-primary/10 rounded-full blur-[60px] md:blur-[150px] mix-blend-screen pointer-events-none will-change-transform"
       />
-      <motion.div
-        animate={{
-          rotate: [360, 0],
-          scale: isMobile ? [1, 1.1, 1] : [1, 1.3, 1],
-        }}
-        transition={{ duration: isMobile ? 50 : 35, repeat: Infinity, ease: "linear" }}
-        className="absolute bottom-[-20%] right-[-10%] w-[80vw] h-[80vw] bg-secondary/10 rounded-full blur-[100px] md:blur-[150px] mix-blend-screen pointer-events-none will-change-transform"
-      />
+      {!isMobile && (
+        <motion.div
+          animate={{
+            rotate: [360, 0],
+            scale: [1, 1.3, 1],
+          }}
+          transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-[-20%] right-[-10%] w-[80vw] h-[80vw] bg-secondary/10 rounded-full blur-[150px] mix-blend-screen pointer-events-none will-change-transform"
+        />
+      )}
 
       {/* Interactive Glow - Disabled on Mobile for Performance */}
       {!isMobile && (

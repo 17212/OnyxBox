@@ -61,3 +61,20 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+.text-glow-purple {
+  color: #4b0082; /* Dark Purple */
+  text-shadow: 0 0 10px rgba(112, 0, 255, 0.5), 0 0 20px rgba(112, 0, 255, 0.3);
+  animation: glow-pulse 2s infinite alternate;
+}
+
+@keyframes glow-pulse {
+  from {
+    text-shadow: 0 0 10px rgba(112, 0, 255, 0.5), 0 0 20px rgba(112, 0, 255, 0.3);
+    opacity: 0.8;
+  }
+  to {
+    text-shadow: 0 0 20px rgba(112, 0, 255, 0.8), 0 0 30px rgba(112, 0, 255, 0.5), 0 0 40px rgba(112, 0, 255, 0.3);
+    opacity: 1;
+  }
+}

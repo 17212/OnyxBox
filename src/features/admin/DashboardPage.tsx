@@ -100,7 +100,7 @@ export default function DashboardPage() {
 
     const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
     const unsubscribeSnapshot = onSnapshot(q, (snapshot: QuerySnapshot<DocumentData>) => {
-      const msgs = snapshot.docs.map((doc) => ({
+      const msgs = snapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
       })) as Message[];
@@ -116,7 +116,7 @@ export default function DashboardPage() {
   }, [router]);
 
   useEffect(() => {
-    const filtered = messages.filter((msg) =>
+    const filtered = messages.filter((msg: Message) =>
       msg.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (msg.senderName && msg.senderName.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -185,17 +185,17 @@ export default function DashboardPage() {
     let result = filteredMessages;
     switch (activeFilter) {
       case "unread":
-        result = result.filter(m => !m.readStatus);
+        result = result.filter((m: Message) => !m.readStatus);
         break;
       case "pinned":
-        result = result.filter(m => m.isPinned);
+        result = result.filter((m: Message) => m.isPinned);
         break;
       case "favorites":
-        result = result.filter(m => m.isFavorite);
+        result = result.filter((m: Message) => m.isFavorite);
         break;
     }
     // Sort pinned messages first
-    return result.sort((a, b) => {
+    return result.sort((a: Message, b: Message) => {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       return 0;
@@ -234,7 +234,7 @@ export default function DashboardPage() {
   };
 
   const handleExport = () => {
-    const dataToExport = messages.map(msg => ({
+    const dataToExport = messages.map((msg: Message) => ({
       Content: msg.content,
       Sender: msg.senderName || "Anonymous",
       Date: msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleString() : "N/A",
@@ -659,7 +659,7 @@ export default function DashboardPage() {
             className="text-3xl font-bold text-white group flex items-center gap-1"
             dir="ltr"
           >
-            onyx<span className="text-gradient-blue group-hover:brightness-125 transition-all">box</span>
+            onyx<span className="text-glow-purple group-hover:brightness-125 transition-all">box</span>
           </motion.button>
           <span className="text-primary/50 text-sm font-normal ml-2">{AR.dashboard.title}</span>
           {user?.email === "murphysec72@gmail.com" && (
@@ -709,7 +709,7 @@ export default function DashboardPage() {
 
       <StatsWidget 
         totalMessages={messages.length} 
-        unreadMessages={messages.filter(m => !m.readStatus).length} 
+        unreadMessages={messages.filter((m: Message) => !m.readStatus).length} 
       />
 
       {/* Filter Bar */}
@@ -743,7 +743,7 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {getFilteredMessages().map((msg) => (
+          {getFilteredMessages().map((msg: Message) => (
             <div key={msg.id} id={`message-${msg.id}`} className="relative group">
               <GlassCard 
                 className={`h-full flex flex-col justify-between transition-all duration-300 ${msg.readStatus ? 'opacity-70' : 'border-primary/50'} ${msg.isPinned ? 'ring-2 ring-primary/30' : ''}`}

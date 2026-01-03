@@ -4,8 +4,11 @@ service cloud.firestore {
     // Allow anyone to create a message (Public)
     match /messages/{messageId} {
       allow create: if true;
-      // Only authenticated users (Admin) can read, update, or delete
-      allow read, update, delete: if request.auth != null;
+      allow read: if request.auth != null && (
+        resource.data.senderUid == request.auth.uid || 
+        request.auth.token.email in ['murphysec72@gmail.com', 'idris.ghamid@gmail.com']
+      );
+      allow update, delete: if request.auth != null && request.auth.token.email in ['murphysec72@gmail.com', 'idris.ghamid@gmail.com'];
     }
   }
 }

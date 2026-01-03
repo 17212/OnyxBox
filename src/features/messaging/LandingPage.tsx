@@ -59,7 +59,7 @@ export default function LandingPage() {
   const [lastReply, setLastReply] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser: any) => {
       setUser(currentUser);
       setAuthLoading(false);
     });
@@ -202,6 +202,10 @@ export default function LandingPage() {
           }
         }
       });
+    }, (error: any) => {
+      if (error.code !== "permission-denied") {
+        console.error("Snapshot listener error:", error);
+      }
     });
 
     return () => unsubscribe();
@@ -241,7 +245,7 @@ export default function LandingPage() {
           className="text-3xl md:text-4xl font-bold text-white tracking-tighter group flex items-center gap-2"
           dir="ltr"
         >
-          onyx<span className="text-gradient-blue group-hover:brightness-125 transition-all">box</span>
+          onyx<span className="text-glow-purple group-hover:brightness-125 transition-all">box</span>
         </motion.button>
 
         <div className="flex items-center gap-4">
@@ -440,7 +444,6 @@ export default function LandingPage() {
                         placeholder={AR.form.namePlaceholder}
                         className="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all"
                       />
-                      <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 group-focus-within:text-primary transition-colors" />
                     </div>
                   </div>
 

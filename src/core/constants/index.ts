@@ -55,7 +55,7 @@ export const AR = {
     emptyWarning: "اكتب حاجة الأول يا زعيم!",
     successMessage: "وصلتني رسالتك!",
     errorMessage: "في مشكلة.. جرب تاني",
-    characterCount: "حرف",
+    characterCount: "",
     moodLabel: "حاسس بإيه مثلا؟",
   },
 
@@ -93,7 +93,7 @@ export const AR = {
     deleteSuccess: "اتمسحت! 🗑️",
     markRead: "اتقريت",
     markUnread: "جديدة",
-    superAdmin: "سوبر أدمن 🦅",
+    superAdmin: "سوبر أدمن",
   },
 
   // === MESSAGE CARD ===
