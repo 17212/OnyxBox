@@ -228,78 +228,15 @@ export default function DashboardPage() {
           logging: false,
           onclone: (clonedDoc: Document) => {
             const el = clonedDoc.getElementById("story-preview-container");
-            if (!el) return;
-
-            // 1. COMPLETELY WIPE THE HEAD and replace with safe styles
-            // This is the ultimate fix for the oklab parsing error
-            clonedDoc.head.innerHTML = `
-              <style>
-                * { 
-                  box-sizing: border-box !important;
-                  backdrop-filter: none !important; 
-                  -webkit-backdrop-filter: none !important; 
-                  animation: none !important;
-                  transition: none !important;
-                  text-shadow: none !important;
+            if (el) {
+              const glassElements = el.querySelectorAll('[style*="backdrop-filter"]');
+              glassElements.forEach((e: any) => {
+                e.style.backdropFilter = "none";
+                e.style.webkitBackdropFilter = "none";
+                if (e.style.backgroundColor.includes("rgba")) {
+                  e.style.backgroundColor = e.style.backgroundColor.replace(/[\d\.]+\)$/, "0.95)");
                 }
-                #story-preview-container {
-                  display: flex !important;
-                  flex-direction: column !important;
-                  align-items: center !important;
-                  justify-content: center !important;
-                  background: ${storyConfig.bg} !important;
-                }
-                .text-white { color: #ffffff !important; }
-                .font-bold { font-weight: 700 !important; }
-                .font-black { font-weight: 900 !important; }
-                .uppercase { text-transform: uppercase !important; }
-              </style>
-            `;
-
-            // 2. Manually inline computed styles from the original document
-            const allCloned = el.getElementsByTagName('*');
-            const originalContainer = storyRef.current;
-            if (originalContainer) {
-              const allOriginal = originalContainer.getElementsByTagName('*');
-              
-              for (let i = 0; i < allCloned.length; i++) {
-                const c = allCloned[i] as HTMLElement;
-                const o = allOriginal[i] as HTMLElement;
-                if (o) {
-                  const computed = window.getComputedStyle(o);
-                  
-                  // Copy essential properties manually to ensure they are in RGB/Hex
-                  c.style.color = computed.color;
-                  c.style.backgroundColor = computed.backgroundColor;
-                  c.style.borderColor = computed.borderColor;
-                  c.style.fontSize = computed.fontSize;
-                  c.style.fontWeight = computed.fontWeight;
-                  c.style.fontFamily = computed.fontFamily;
-                  c.style.lineHeight = computed.lineHeight;
-                  c.style.textAlign = computed.textAlign;
-                  c.style.padding = computed.padding;
-                  c.style.margin = computed.margin;
-                  c.style.borderRadius = computed.borderRadius;
-                  c.style.borderWidth = computed.borderWidth;
-                  c.style.borderStyle = computed.borderStyle;
-                  c.style.display = computed.display;
-                  c.style.flexDirection = computed.flexDirection;
-                  c.style.alignItems = computed.alignItems;
-                  c.style.justifyContent = computed.justifyContent;
-                  c.style.gap = computed.gap;
-                  c.style.position = computed.position;
-                  c.style.width = computed.width;
-                  c.style.height = computed.height;
-                  c.style.opacity = computed.opacity;
-                  c.style.boxShadow = computed.boxShadow;
-                  c.style.transform = computed.transform;
-                  
-                  // Extra safety: replace any oklch/oklab strings if they somehow leaked in
-                  if (c.style.cssText.includes('okl')) {
-                    c.style.cssText = c.style.cssText.replace(/(oklch|oklab)\([^)]+\)/g, '#00f0ff');
-                  }
-                }
-              }
+              });
             }
           }
         });
@@ -355,17 +292,17 @@ export default function DashboardPage() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 overflow-y-auto"
           >
-            <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 items-start lg:items-center">
+            <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 items-start lg:items-center">
               
               {/* Preview Area */}
-              <div className="lg:col-span-2 flex items-center justify-center overflow-hidden min-h-[300px] md:min-h-[600px] py-4 md:py-0">
+              <div className="lg:col-span-2 flex items-center justify-center overflow-hidden min-h-[400px] md:min-h-[600px]">
                 <motion.div 
                   ref={storyRef}
                   id="story-preview-container"
                   className="w-[1080px] h-[1920px] bg-[#030305] flex flex-col items-center justify-center relative overflow-hidden shrink-0"
                   style={{ 
                     background: storyConfig.bg,
-                    transform: isMobile ? "scale(0.15)" : "scale(0.35)", 
+                    transform: isMobile ? "scale(0.18)" : "scale(0.35)", 
                     transformOrigin: "center center"
                   }}
                 >
