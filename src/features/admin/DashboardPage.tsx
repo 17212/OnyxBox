@@ -85,6 +85,15 @@ export default function DashboardPage() {
     { name: "Mono", value: "font-mono" },
   ];
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged((u: FirebaseUser | null) => {
       if (!u || !isAdmin(u.email)) {
@@ -211,11 +220,25 @@ export default function DashboardPage() {
   const downloadStory = async () => {
     if (storyRef.current) {
       try {
+        toast.info("جاري تحضير الصورة...");
         const canvas = await html2canvas(storyRef.current, {
           backgroundColor: "#030305",
           scale: 2,
           useCORS: true,
-          logging: true,
+          logging: false,
+          onclone: (clonedDoc: Document) => {
+            const el = clonedDoc.getElementById("story-preview-container");
+            if (el) {
+              const glassElements = el.querySelectorAll('[style*="backdrop-filter"]');
+              glassElements.forEach((e: any) => {
+                e.style.backdropFilter = "none";
+                e.style.webkitBackdropFilter = "none";
+                if (e.style.backgroundColor.includes("rgba")) {
+                  e.style.backgroundColor = e.style.backgroundColor.replace(/[\d\.]+\)$/, "0.95)");
+                }
+              });
+            }
+          }
         });
         const image = canvas.toDataURL("image/png");
         const link = document.createElement("a");
@@ -228,7 +251,7 @@ export default function DashboardPage() {
         setStoryMessage(null);
       } catch (error) {
         console.error("Error generating story:", error);
-        toast.error("Failed to generate story");
+        toast.error("فشل إنشاء الصورة.. جرب تغير الاستايل");
       }
     }
   };
@@ -269,16 +292,17 @@ export default function DashboardPage() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 overflow-y-auto"
           >
-            <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+            <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 items-start lg:items-center">
               
               {/* Preview Area */}
-              <div className="lg:col-span-2 flex items-center justify-center">
+              <div className="lg:col-span-2 flex items-center justify-center overflow-hidden min-h-[400px] md:min-h-[600px]">
                 <motion.div 
                   ref={storyRef}
+                  id="story-preview-container"
                   className="w-[1080px] h-[1920px] bg-[#030305] flex flex-col items-center justify-center relative overflow-hidden shrink-0"
                   style={{ 
                     background: storyConfig.bg,
-                    transform: "scale(0.35)", // Scale down for preview
+                    transform: isMobile ? "scale(0.18)" : "scale(0.35)", 
                     transformOrigin: "center center"
                   }}
                 >
@@ -401,7 +425,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Controls Area */}
-              <GlassCard className="h-fit space-y-6 overflow-y-auto max-h-[90vh] p-8 border-white/10 custom-scrollbar">
+              <GlassCard className="h-fit space-y-6 overflow-y-auto max-h-[80vh] lg:max-h-[90vh] p-6 md:p-8 border-white/10 custom-scrollbar">
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
                   <div className="flex flex-col">
                     <h2 className="text-2xl font-bold text-white flex items-center gap-2">

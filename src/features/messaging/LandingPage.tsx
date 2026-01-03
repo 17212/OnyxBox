@@ -94,6 +94,22 @@ export default function LandingPage() {
     }
   };
 
+  const handleAnonymousLogin = async () => {
+    try {
+      setLoading(true);
+      await signInAnonymously(auth);
+      playSound("success");
+      vibrate(50);
+      toast.success(AR.auth.loginSuccess);
+    } catch (error) {
+      console.error("Anonymous login error:", error);
+      toast.error(AR.auth.loginFailed);
+      playSound("error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

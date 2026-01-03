@@ -46,7 +46,7 @@ export default function AnimatedBackground() {
           rotate: [0, 360],
           scale: isMobile ? [1, 1.05, 1] : [1, 1.2, 1],
         }}
-        transition={{ duration: isMobile ? 60 : 30, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: isMobile ? 80 : 30, repeat: Infinity, ease: "linear" }}
         className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] bg-primary/10 rounded-full blur-[60px] md:blur-[150px] mix-blend-screen pointer-events-none will-change-transform"
       />
       {!isMobile && (
@@ -72,23 +72,27 @@ export default function AnimatedBackground() {
         />
       )}
 
-      {/* Cyberpunk Grid */}
-      <div 
-        className="absolute inset-0 opacity-[0.05]" 
-        style={{
-          backgroundImage: `
-            linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
-          `,
-          backgroundSize: '60px 60px',
-          maskImage: 'radial-gradient(circle at center, black 40%, transparent 100%)'
-        }}
-      />
+      {/* Cyberpunk Grid - Disabled on Mobile */}
+      {!isMobile && (
+        <div 
+          className="absolute inset-0 opacity-[0.05]" 
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px',
+            maskImage: 'radial-gradient(circle at center, black 40%, transparent 100%)'
+          }}
+        />
+      )}
 
-      {/* Noise Texture for Film Grain Feel */}
-      <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none"
-           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
-      />
+      {/* Noise Texture - Disabled on Mobile */}
+      {!isMobile && (
+        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none"
+             style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+        />
+      )}
     </div>
   );
 }
