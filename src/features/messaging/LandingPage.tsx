@@ -420,7 +420,7 @@ export default function LandingPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-3xl md:text-4xl font-bold mb-2 text-white h-auto tracking-tight"
                   >
-                    ابعتلي رسالة سرية 👻
+                    ابعتلي رسالة بشكل سري
                   </motion.h1>
                   <motion.p 
                     initial={{ opacity: 0 }}
