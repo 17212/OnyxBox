@@ -245,7 +245,7 @@ export default function DashboardPage() {
                 if (item.style.backdropFilter || (item.style as any).webkitBackdropFilter) {
                   item.style.backdropFilter = "none";
                   (item.style as any).webkitBackdropFilter = "none";
-                  if (item.className.includes('glass')) {
+                  if (item.classList.contains('glass')) {
                     item.style.backgroundColor = "rgba(10, 10, 12, 0.95)";
                   }
                 }
@@ -260,8 +260,8 @@ export default function DashboardPage() {
                 }
 
                 // Force standard colors for common classes
-                if (item.className.includes('text-white')) item.style.color = "#ffffff";
-                if (item.className.includes('text-primary')) item.style.color = "#00f0ff";
+                if (item.classList.contains('text-white')) item.style.color = "#ffffff";
+                if (item.classList.contains('text-primary')) item.style.color = "#00f0ff";
               }
             }
           }
