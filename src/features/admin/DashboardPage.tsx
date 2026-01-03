@@ -226,17 +226,43 @@ export default function DashboardPage() {
           scale: 2,
           useCORS: true,
           logging: false,
+          allowTaint: true,
           onclone: (clonedDoc: Document) => {
             const el = clonedDoc.getElementById("story-preview-container");
             if (el) {
-              const glassElements = el.querySelectorAll('[style*="backdrop-filter"]');
-              glassElements.forEach((e: any) => {
-                e.style.backdropFilter = "none";
-                e.style.webkitBackdropFilter = "none";
-                if (e.style.backgroundColor.includes("rgba")) {
-                  e.style.backgroundColor = e.style.backgroundColor.replace(/[\d\.]+\)$/, "0.95)");
+              // 1. Remove scale transform for capture
+              el.style.transform = "none";
+              el.style.position = "fixed";
+              el.style.top = "0";
+              el.style.left = "0";
+              
+              // 2. Aggressively clean styles to avoid oklab/oklch errors
+              const allElements = clonedDoc.getElementsByTagName('*');
+              for (let i = 0; i < allElements.length; i++) {
+                const item = allElements[i] as HTMLElement;
+                
+                // Fix backdrop-filter
+                if (item.style.backdropFilter || (item.style as any).webkitBackdropFilter) {
+                  item.style.backdropFilter = "none";
+                  (item.style as any).webkitBackdropFilter = "none";
+                  if (item.className.includes('glass')) {
+                    item.style.backgroundColor = "rgba(10, 10, 12, 0.95)";
+                  }
                 }
-              });
+
+                // Strip oklch/oklab from inline styles which crash html2canvas
+                const inlineStyle = item.getAttribute('style');
+                if (inlineStyle && (inlineStyle.includes('oklch') || inlineStyle.includes('oklab'))) {
+                  const cleanStyle = inlineStyle
+                    .replace(/oklch\([^)]+\)/g, '#ffffff')
+                    .replace(/oklab\([^)]+\)/g, '#ffffff');
+                  item.setAttribute('style', cleanStyle);
+                }
+
+                // Force standard colors for common classes
+                if (item.className.includes('text-white')) item.style.color = "#ffffff";
+                if (item.className.includes('text-primary')) item.style.color = "#00f0ff";
+              }
             }
           }
         });
