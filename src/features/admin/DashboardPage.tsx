@@ -21,6 +21,7 @@ import { AR, ADMIN_REACTIONS, timeAgo, isAdmin } from "@/core/constants";
 import { Message } from "@/core/types";
 import { User as FirebaseUser } from "firebase/auth";
 import { DocumentData, QuerySnapshot } from "firebase/firestore";
+import AboutModal from "@/shared/components/AboutModal";
 
 type FilterType = "all" | "unread" | "pinned" | "favorites";
 
