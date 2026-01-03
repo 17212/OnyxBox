@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { collection, addDoc, serverTimestamp, query, where, orderBy, limit, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, where, orderBy, limit, onSnapshot, doc, onSnapshot as onDocSnapshot } from "firebase/firestore";
 import { 
   signInWithPopup, 
   GoogleAuthProvider, 
@@ -16,11 +16,12 @@ import { auth, db } from "@/core/lib/firebase";
 import GlassCard from "@/shared/components/GlassCard";
 import GradientButton from "@/shared/components/GradientButton";
 import AnimatedBackground from "@/shared/components/AnimatedBackground";
-import { CheckCircle, AlertCircle, Lock, Mail, User as UserIcon, LogIn } from "lucide-react";
+import { CheckCircle, AlertCircle, Lock, Mail, User as UserIcon, LogIn, Bell, Heart, MessageCircle } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { playSound, vibrate } from "@/core/utils/sound";
 import AboutModal from "@/shared/components/AboutModal";
+import { AR, MOODS, timeAgo } from "@/core/constants";
 
 const TypewriterText = ({ text }: { text: string }) => {
   const [displayedText, setDisplayedText] = useState("");
@@ -40,7 +41,6 @@ const TypewriterText = ({ text }: { text: string }) => {
 
 export default function LandingPage() {
   const [mood, setMood] = useState("👻");
-  const MOODS = ["👻", "❤️", "😂", "😡", "😢", "🔥"];
   const [message, setMessage] = useState("");
   const [senderName, setSenderName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,6 +53,9 @@ export default function LandingPage() {
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [lastReaction, setLastReaction] = useState<string | null>(null);
+  const [lastReply, setLastReply] = useState<string | null>(null);
+  const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -80,10 +83,10 @@ export default function LandingPage() {
       await signInWithPopup(auth, provider);
       playSound("success");
       vibrate([10, 30, 10]);
-      toast.success("Logged in successfully!");
+      toast.success(AR.auth.loginSuccess);
     } catch (error) {
       console.error("Google login error:", error);
-      toast.error("Login failed.");
+      toast.error(AR.auth.loginFailed);
       playSound("error");
     } finally {
       setLoading(false);
@@ -96,10 +99,10 @@ export default function LandingPage() {
       await signInAnonymously(auth);
       playSound("success");
       vibrate([10, 30, 10]);
-      toast.success("Continued anonymously!");
+      toast.success(AR.auth.anonymousSuccess);
     } catch (error) {
       console.error("Anonymous login error:", error);
-      toast.error("Login failed.");
+      toast.error(AR.auth.loginFailed);
       playSound("error");
     } finally {
       setLoading(false);
@@ -112,10 +115,10 @@ export default function LandingPage() {
     try {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, password);
-        toast.success("Account created!");
+        toast.success(AR.auth.signupSuccess);
       } else {
         await signInWithEmailAndPassword(auth, email, password);
-        toast.success("Logged in!");
+        toast.success(AR.auth.loginSuccess);
       }
       playSound("success");
     } catch (error: any) {
@@ -133,7 +136,7 @@ export default function LandingPage() {
 
     if (cooldown) {
       playSound("error");
-      toast.error("Please wait a moment before sending another message.");
+      toast.error(AR.errors.rateLimit);
       return;
     }
 
@@ -157,11 +160,11 @@ export default function LandingPage() {
       setMessage("");
       playSound("success");
       vibrate([20, 50, 20]);
-      toast.success("Message sent securely!");
+      toast.success(AR.form.successMessage);
     } catch (error) {
       console.error("Error sending message:", error);
       playSound("error");
-      toast.error("Failed to send message. Please try again.");
+      toast.error(AR.form.errorMessage);
     } finally {
       setLoading(false);
     }
@@ -183,10 +186,28 @@ export default function LandingPage() {
         if (change.type === "modified") {
           const data = change.doc.data();
           if (data.readStatus === true) {
-            toast("👁️ idris just read your message!", {
+            toast(AR.notifications.messageRead, {
               style: { background: "#000", color: "#fff", border: "1px solid #00f0ff" }
             });
             playSound("notification");
+          }
+          // Admin reaction notification
+          if (data.adminReaction && data.adminReaction !== lastReaction) {
+            setLastReaction(data.adminReaction);
+            toast(`${AR.notifications.adminReacted} ${data.adminReaction}`, {
+              style: { background: "#000", color: "#fff", border: "1px solid #ff00e5" }
+            });
+            playSound("notification");
+            vibrate([50, 100, 50]);
+          }
+          // Admin reply notification
+          if (data.adminReply && data.adminReply !== lastReply) {
+            setLastReply(data.adminReply);
+            toast(AR.notifications.newReply, {
+              style: { background: "#000", color: "#fff", border: "1px solid #00ff88" }
+            });
+            playSound("notification");
+            vibrate([100, 50, 100]);
           }
         }
       });
@@ -267,8 +288,8 @@ export default function LandingPage() {
           >
             <GlassCard className="w-full p-6 md:p-10">
               <div className="text-center mb-10">
-                <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">OnyxBox</h1>
-                <p className="text-gray-500 font-medium">Secure. Anonymous. Minimal.</p>
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">{AR.auth.welcome}</h1>
+                <p className="text-gray-500 font-medium">{AR.tagline}</p>
               </div>
 
               {!showEmailForm ? (
@@ -284,7 +305,7 @@ export default function LandingPage() {
                       <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84z" />
                       <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                     </svg>
-                    Continue with Google
+                    {AR.auth.continueGoogle}
                   </button>
 
                   <button
@@ -293,7 +314,7 @@ export default function LandingPage() {
                     onMouseEnter={() => playSound("hover")}
                   >
                     <Mail className="w-5 h-5" />
-                    Continue with Email
+                    {AR.auth.continueEmail}
                   </button>
 
                   <div className="relative my-8">
@@ -301,7 +322,7 @@ export default function LandingPage() {
                       <div className="w-full border-t border-white/5"></div>
                     </div>
                     <div className="relative flex justify-center text-xs uppercase tracking-widest">
-                      <span className="px-4 bg-[#030305] text-gray-600">Privacy First</span>
+                      <span className="px-4 bg-[#030305] text-gray-600">الخصوصية أولاً 🔒</span>
                     </div>
                   </div>
 
@@ -311,7 +332,7 @@ export default function LandingPage() {
                     onMouseEnter={() => playSound("hover")}
                   >
                     <UserIcon className="w-5 h-5" />
-                    Continue Anonymously
+                    {AR.auth.continueAnonymous}
                   </button>
                 </div>
               ) : (
@@ -319,7 +340,7 @@ export default function LandingPage() {
                   <div>
                     <input
                       type="email"
-                      placeholder="Email Address"
+                      placeholder={AR.auth.emailPlaceholder}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-glass-bg border border-glass-border rounded-lg p-3 text-white focus:border-primary focus:outline-none"
@@ -329,7 +350,7 @@ export default function LandingPage() {
                   <div>
                     <input
                       type="password"
-                      placeholder="Password"
+                      placeholder={AR.auth.passwordPlaceholder}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full bg-glass-bg border border-glass-border rounded-lg p-3 text-white focus:border-primary focus:outline-none"
@@ -338,15 +359,15 @@ export default function LandingPage() {
                   </div>
                   
                   <GradientButton type="submit" className="w-full" isLoading={loading}>
-                    {isSignUp ? "Create Account" : "Sign In"}
+                    {isSignUp ? AR.auth.signupButton : AR.auth.loginButton}
                   </GradientButton>
 
                   <div className="flex justify-between text-sm text-gray-400 mt-4">
                     <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="hover:text-white underline">
-                      {isSignUp ? "Already have an account?" : "Need an account?"}
+                      {isSignUp ? AR.auth.switchToLogin : AR.auth.switchToSignup}
                     </button>
                     <button type="button" onClick={() => setShowEmailForm(false)} className="hover:text-white">
-                      Back
+                      رجوع
                     </button>
                   </div>
                 </form>
@@ -386,8 +407,7 @@ export default function LandingPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-3xl md:text-4xl font-bold mb-2 text-white h-auto tracking-tight"
                   >
-                    <TypewriterText text="Send a secret message to " />
-                    <span className="text-primary">idris</span>
+                    ابعتلي رسالة سرية 👻
                   </motion.h1>
                   <motion.p 
                     initial={{ opacity: 0 }}
@@ -395,7 +415,7 @@ export default function LandingPage() {
                     transition={{ delay: 0.5 }}
                     className="text-gray-500 font-medium"
                   >
-                    Your identity will remain anonymous.
+                    {AR.tagline}
                   </motion.p>
                 </div>
 
@@ -440,12 +460,13 @@ export default function LandingPage() {
                       <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Write your secret here..."
+                        placeholder={AR.form.placeholder}
                         className="w-full h-40 bg-black/40 border border-white/10 rounded-2xl p-6 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all resize-none text-lg leading-relaxed"
                         required
+                        maxLength={500}
                       />
                       <div className="absolute bottom-4 right-4 text-xs text-gray-600 font-mono">
-                        {message.length} characters
+                        {message.length}/500 {AR.form.characterCount}
                       </div>
                     </div>
 
@@ -454,7 +475,7 @@ export default function LandingPage() {
                         type="text"
                         value={senderName}
                         onChange={(e) => setSenderName(e.target.value)}
-                        placeholder="Your name (Optional)"
+                        placeholder={AR.form.namePlaceholder}
                         className="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all"
                       />
                       <UserIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 group-focus-within:text-primary transition-colors" />
@@ -467,7 +488,7 @@ export default function LandingPage() {
                     isLoading={loading}
                     disabled={cooldown}
                   >
-                    {cooldown ? "Wait for cooldown..." : "Send Secretly"}
+                    {cooldown ? AR.form.cooldownWarning : AR.form.sendButton}
                   </GradientButton>
                 </form>
               </GlassCard>
@@ -501,8 +522,9 @@ export default function LandingPage() {
                 transition={{ delay: 0.3 }}
                 className="relative z-10"
               >
-                <h2 className="text-5xl font-bold text-white mb-4 tracking-tighter">تم الإرسال!</h2>
-                <p className="text-primary/80 font-medium mb-10 text-lg">تم التشفير والإرسال بنجاح</p>
+                <h2 className="text-5xl font-bold text-white mb-4 tracking-tighter">{AR.success.title}</h2>
+                <p className="text-primary/80 font-medium mb-6 text-lg">{AR.success.subtitle}</p>
+                <p className="text-gray-500 text-sm mb-10">{AR.success.notification}</p>
               </motion.div>
               
               <motion.button
@@ -520,7 +542,7 @@ export default function LandingPage() {
                 className="relative z-10 text-primary font-bold text-xl hover:text-white transition-all py-4 px-12 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md hover:bg-primary/20 hover:border-primary/60 shadow-[0_0_20px_rgba(0,240,255,0.1)]"
                 onMouseEnter={() => playSound("hover")}
               >
-                إرسال رسالة أخرى
+                {AR.success.sendAnother}
               </motion.button>
             </GlassCard>
           </motion.div>

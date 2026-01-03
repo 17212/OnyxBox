@@ -2,6 +2,7 @@
 
 import GlassCard from "@/shared/components/GlassCard";
 import { MessageSquare, Clock, Zap } from "lucide-react";
+import { AR } from "@/core/constants";
 
 interface StatsProps {
   totalMessages: number;
@@ -16,7 +17,7 @@ export default function StatsWidget({ totalMessages, unreadMessages }: StatsProp
           <MessageSquare className="w-6 h-6" />
         </div>
         <div>
-          <p className="text-gray-400 text-sm">Total Messages</p>
+          <p className="text-gray-400 text-sm">{AR.dashboard.totalMessages}</p>
           <h3 className="text-2xl font-bold text-white">{totalMessages}</h3>
         </div>
       </GlassCard>
@@ -26,7 +27,7 @@ export default function StatsWidget({ totalMessages, unreadMessages }: StatsProp
           <Zap className="w-6 h-6" />
         </div>
         <div>
-          <p className="text-gray-400 text-sm">New / Unread</p>
+          <p className="text-gray-400 text-sm">{AR.dashboard.unreadMessages}</p>
           <h3 className="text-2xl font-bold text-white">{unreadMessages}</h3>
         </div>
       </GlassCard>
@@ -36,8 +37,8 @@ export default function StatsWidget({ totalMessages, unreadMessages }: StatsProp
           <Clock className="w-6 h-6" />
         </div>
         <div>
-          <p className="text-gray-400 text-sm">System Status</p>
-          <h3 className="text-2xl font-bold text-white">Online 🟢</h3>
+          <p className="text-gray-400 text-sm">{AR.dashboard.systemStatus}</p>
+          <h3 className="text-2xl font-bold text-white">{AR.dashboard.online} 🟢</h3>
         </div>
       </GlassCard>
     </div>

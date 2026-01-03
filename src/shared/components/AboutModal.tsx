@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Github, Instagram, Send, Mail, ExternalLink, Globe, ShieldCheck } from "lucide-react";
 import GlassCard from "./GlassCard";
 
+import { AR } from "@/core/constants";
+
 interface AboutModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -84,8 +86,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
                 <p className="text-gradient-blue font-mono text-sm mb-6 uppercase tracking-[0.3em]">إدريس غامد</p>
 
                 <p className="text-gray-400 text-sm leading-relaxed mb-8 max-w-sm">
-                  Lead Developer & Architect at <span className="text-gradient-blue font-bold uppercase tracking-wider">IDRISIUM Corp</span>. 
-                  Obsessed with creating pixel-perfect, high-performance digital experiences.
+                  {AR.about.description}
                 </p>
 
                 <div className="grid grid-cols-2 gap-3 w-full mb-8">
@@ -131,7 +132,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
 
                 <div className="mt-8 pt-8 border-t border-white/5 w-full flex items-center justify-center gap-2 text-[10px] text-gray-600 font-mono uppercase tracking-[0.2em]">
                   <ShieldCheck className="w-3 h-3 text-primary" />
-                  Powered by IDRISIUM Security
+                  {AR.about.footer}
                 </div>
               </div>
             </GlassCard>

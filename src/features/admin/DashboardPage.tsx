@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import GlassCard from "@/shared/components/GlassCard";
 import AnimatedBackground from "@/shared/components/AnimatedBackground";
-import { Trash2, LogOut, Share2, Check, Eye, EyeOff, Search, Download, Shield, Inbox, User, Clock, Palette, Type, Layout, Sparkles } from "lucide-react";
+import { Trash2, LogOut, Share2, Check, Eye, EyeOff, Search, Download, Shield, Inbox, User, Clock, Palette, Type, Layout, Sparkles, Heart, MessageCircle, Pin, Star, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { arEG } from "date-fns/locale";
 import html2canvas from "html2canvas";
@@ -17,26 +17,26 @@ import "react-toastify/dist/ReactToastify.css";
 import StatsWidget from "@/features/admin/StatsWidget";
 import { downloadCSV } from "@/core/utils/export";
 import { playSound } from "@/core/utils/sound";
-import AboutModal from "@/shared/components/AboutModal";
+import { AR, ADMIN_REACTIONS, timeAgo, isAdmin } from "@/core/constants";
+import { Message } from "@/core/types";
+import { User as FirebaseUser } from "firebase/auth";
+import { DocumentData, QuerySnapshot } from "firebase/firestore";
 
-interface Message {
-  id: string;
-  content: string;
-  senderName?: string;
-  timestamp: any;
-  readStatus: boolean;
-  mood?: string;
-}
+type FilterType = "all" | "unread" | "pinned" | "favorites";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [filteredMessages, setFilteredMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [stealthMode, setStealthMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAbout, setShowAbout] = useState(false);
-  const router = useRouter();
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
   const storyRef = useRef<HTMLDivElement>(null);
   const [storyMessage, setStoryMessage] = useState<Message | null>(null);
   const [isCustomizing, setIsCustomizing] = useState(false);
@@ -68,8 +68,12 @@ export default function DashboardPage() {
   const ACCENTS = ["#00f0ff", "#ff00e5", "#7000ff", "#00ff88", "#ffbb00"];
 
   useEffect(() => {
-    const unsubscribeAuth = auth.onAuthStateChanged((u) => {
-      if (!u) {
+    const unsubscribeAuth = auth.onAuthStateChanged((u: FirebaseUser | null) => {
+      if (!u || !isAdmin(u.email)) {
+        if (u) {
+          signOut(auth);
+          toast.error(AR.errors.permission);
+        }
         router.push("/admin/login");
       } else {
         setUser(u);
@@ -77,7 +81,7 @@ export default function DashboardPage() {
     });
 
     const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
-    const unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+    const unsubscribeSnapshot = onSnapshot(q, (snapshot: QuerySnapshot<DocumentData>) => {
       const msgs = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -119,6 +123,65 @@ export default function DashboardPage() {
       readStatus: !currentStatus,
     });
     playSound("click");
+  };
+
+  // === NEW ADMIN INTERACTION FEATURES ===
+  const handleReaction = async (id: string, reaction: string) => {
+    await updateDoc(doc(db, "messages", id), {
+      adminReaction: reaction,
+    });
+    playSound("success");
+    toast.success(`رديت بـ ${reaction} 🔥`);
+    setShowReactionPicker(null);
+  };
+
+  const handleReply = async (id: string) => {
+    if (!replyText.trim()) return;
+    await updateDoc(doc(db, "messages", id), {
+      adminReply: replyText,
+    });
+    playSound("success");
+    toast.success(AR.messageCard.replySent);
+    setReplyText("");
+    setReplyingTo(null);
+  };
+
+  const togglePin = async (id: string, currentStatus: boolean) => {
+    await updateDoc(doc(db, "messages", id), {
+      isPinned: !currentStatus,
+    });
+    playSound("click");
+    toast.success(currentStatus ? "اتشال من المثبت" : "اتثبتت! 📌");
+  };
+
+  const toggleFavorite = async (id: string, currentStatus: boolean) => {
+    await updateDoc(doc(db, "messages", id), {
+      isFavorite: !currentStatus,
+    });
+    playSound("click");
+    toast.success(currentStatus ? "اتشالت من المفضلة" : "اتضافت للمفضلة! ⭐");
+  };
+
+  // Apply filters
+  const getFilteredMessages = () => {
+    let result = filteredMessages;
+    switch (activeFilter) {
+      case "unread":
+        result = result.filter(m => !m.readStatus);
+        break;
+      case "pinned":
+        result = result.filter(m => m.isPinned);
+        break;
+      case "favorites":
+        result = result.filter(m => m.isFavorite);
+        break;
+    }
+    // Sort pinned messages first
+    return result.sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return 0;
+    });
   };
 
   const handleShare = (msg: Message) => {
@@ -286,7 +349,7 @@ export default function DashboardPage() {
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
                   <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-primary" />
-                    Story Lab
+                    {AR.story.title}
                   </h2>
                   <button onClick={() => setIsCustomizing(false)} className="p-2 rounded-full hover:bg-white/5 text-gray-400 hover:text-white transition-all">
                     <LogOut className="w-5 h-5" />
@@ -297,7 +360,7 @@ export default function DashboardPage() {
                   {/* Style Section */}
                   <div className="space-y-3">
                     <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold flex items-center gap-2">
-                      <Layout className="w-3 h-3" /> Card Style
+                      <Layout className="w-3 h-3" /> {AR.story.cardStyle}
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       {["glass", "solid", "neon"].map((style) => (
@@ -306,7 +369,7 @@ export default function DashboardPage() {
                           onClick={() => setStoryConfig({ ...storyConfig, cardStyle: style as any })}
                           className={`py-2 rounded-lg border text-[10px] capitalize transition-all ${storyConfig.cardStyle === style ? "border-primary text-primary bg-primary/10 shadow-[0_0_15px_rgba(0,240,255,0.1)]" : "border-white/5 text-gray-500 hover:bg-white/5"}`}
                         >
-                          {style}
+                          {style === "glass" ? "شفاف" : style === "solid" ? "مطفي" : "نيون"}
                         </button>
                       ))}
                     </div>
@@ -315,7 +378,7 @@ export default function DashboardPage() {
                   {/* Background Section */}
                   <div className="space-y-3">
                     <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold flex items-center gap-2">
-                      <Palette className="w-3 h-3" /> Background
+                      <Palette className="w-3 h-3" /> {AR.story.background}
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       {BACKGROUNDS.map((bg) => (
@@ -332,7 +395,7 @@ export default function DashboardPage() {
 
                   {/* Accent Color Section */}
                   <div className="space-y-3">
-                    <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Accent Color</label>
+                    <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">{AR.story.accentColor}</label>
                     <div className="flex gap-3">
                       {ACCENTS.map((color) => (
                         <button
@@ -349,21 +412,21 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">
                       <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold flex items-center gap-2">
-                        <Type className="w-3 h-3" /> Font Size
+                        <Type className="w-3 h-3" /> {AR.story.fontSize}
                       </label>
                       <select 
                         value={storyConfig.fontSize}
                         onChange={(e) => setStoryConfig({ ...storyConfig, fontSize: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-primary"
                       >
-                        <option value="text-xl">Small</option>
-                        <option value="text-2xl">Medium</option>
-                        <option value="text-3xl">Large</option>
-                        <option value="text-4xl">Extra Large</option>
+                        <option value="text-xl">صغير</option>
+                        <option value="text-2xl">متوسط</option>
+                        <option value="text-3xl">كبير</option>
+                        <option value="text-4xl">كبير جداً</option>
                       </select>
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Alignment</label>
+                      <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">{AR.story.alignment}</label>
                       <div className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/5">
                         {["text-left", "text-center", "text-right"].map((align) => (
                           <button
@@ -385,28 +448,28 @@ export default function DashboardPage() {
                         <input type="checkbox" checked={storyConfig.showBadge} onChange={(e) => setStoryConfig({ ...storyConfig, showBadge: e.target.checked })} className="sr-only" />
                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${storyConfig.showBadge ? 'translate-x-5' : ''}`} />
                       </div>
-                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">Badge</span>
+                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">{AR.story.showBadge}</span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer group">
                       <div className={`w-10 h-5 rounded-full relative transition-colors ${storyConfig.showTimestamp ? 'bg-primary' : 'bg-white/10'}`}>
                         <input type="checkbox" checked={storyConfig.showTimestamp} onChange={(e) => setStoryConfig({ ...storyConfig, showTimestamp: e.target.checked })} className="sr-only" />
                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${storyConfig.showTimestamp ? 'translate-x-5' : ''}`} />
                       </div>
-                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">Time</span>
+                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">{AR.story.showTimestamp}</span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer group">
                       <div className={`w-10 h-5 rounded-full relative transition-colors ${storyConfig.showSender ? 'bg-primary' : 'bg-white/10'}`}>
                         <input type="checkbox" checked={storyConfig.showSender} onChange={(e) => setStoryConfig({ ...storyConfig, showSender: e.target.checked })} className="sr-only" />
                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${storyConfig.showSender ? 'translate-x-5' : ''}`} />
                       </div>
-                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">Sender</span>
+                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">{AR.story.showSender}</span>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer group">
                       <div className={`w-10 h-5 rounded-full relative transition-colors ${storyConfig.glowEffect ? 'bg-primary' : 'bg-white/10'}`}>
                         <input type="checkbox" checked={storyConfig.glowEffect} onChange={(e) => setStoryConfig({ ...storyConfig, glowEffect: e.target.checked })} className="sr-only" />
                         <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${storyConfig.glowEffect ? 'translate-x-5' : ''}`} />
                       </div>
-                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">Glow</span>
+                      <span className="text-xs text-gray-400 group-hover:text-white transition-colors">{AR.story.glowEffect}</span>
                     </label>
                   </div>
                 </div>
@@ -416,7 +479,7 @@ export default function DashboardPage() {
                   className="w-full py-4 bg-primary text-black font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(0,240,255,0.2)] mt-8"
                 >
                   <Download className="w-5 h-5" />
-                  Export to Gallery
+                  {AR.story.download}
                 </button>
               </GlassCard>
             </div>
@@ -434,10 +497,10 @@ export default function DashboardPage() {
           >
             onyx<span className="text-gradient-blue group-hover:brightness-125 transition-all">box</span>
           </motion.button>
-          <span className="text-primary/50 text-sm font-normal ml-2">dashboard</span>
+          <span className="text-primary/50 text-sm font-normal ml-2">{AR.dashboard.title}</span>
           {user?.email === "murphysec72@gmail.com" && (
             <span className="px-3 py-1 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/50 flex items-center gap-1">
-              <Shield className="w-3 h-3" /> Super Admin
+              <Shield className="w-3 h-3" /> {AR.dashboard.superAdmin || "Super Admin"}
             </span>
           )}
         </div>
@@ -447,7 +510,7 @@ export default function DashboardPage() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input 
               type="text" 
-              placeholder="Search messages..." 
+              placeholder={AR.dashboard.searchPlaceholder} 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-glass-bg border border-glass-border rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-primary w-full md:w-64 transition-all"
@@ -457,7 +520,7 @@ export default function DashboardPage() {
           <button
             onClick={() => setStealthMode(!stealthMode)}
             className={`p-2 rounded-lg border transition-colors ${stealthMode ? 'bg-primary/20 border-primary text-primary' : 'bg-glass-bg border-glass-border text-gray-400 hover:text-white'}`}
-            title="Stealth Mode (Blur Messages)"
+            title={AR.dashboard.stealthMode}
           >
             {stealthMode ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
           </button>
@@ -465,7 +528,7 @@ export default function DashboardPage() {
           <button
             onClick={handleExport}
             className="p-2 rounded-lg bg-glass-bg border border-glass-border text-gray-400 hover:text-white transition-colors"
-            title="Export CSV"
+            title={AR.dashboard.exportButton}
           >
             <Download className="w-5 h-5" />
           </button>
@@ -475,7 +538,7 @@ export default function DashboardPage() {
             className="flex items-center gap-2 text-gray-400 hover:text-red-400 transition-colors bg-glass-bg px-4 py-2 rounded-lg border border-glass-border"
           >
             <LogOut className="w-5 h-5" />
-            <span className="hidden md:inline">Logout</span>
+            <span className="hidden md:inline">{AR.dashboard.logoutButton}</span>
           </button>
         </div>
       </header>
@@ -485,6 +548,30 @@ export default function DashboardPage() {
         unreadMessages={messages.filter(m => !m.readStatus).length} 
       />
 
+      {/* Filter Bar */}
+      <div className="flex flex-wrap items-center gap-2 mb-8 relative z-10">
+        <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
+          {(['all', 'unread', 'pinned', 'favorites'] as FilterType[]).map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setActiveFilter(filter)}
+              className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${activeFilter === filter ? 'bg-primary text-black shadow-lg' : 'text-gray-400 hover:text-white'}`}
+            >
+              {filter === 'all' && "الكل"}
+              {filter === 'unread' && "جديد"}
+              {filter === 'pinned' && "مثبت 📌"}
+              {filter === 'favorites' && "مفضلة ⭐"}
+            </button>
+          ))}
+        </div>
+        
+        <div className="flex-1" />
+        
+        <div className="text-[10px] text-gray-500 font-mono uppercase tracking-widest">
+          {getFilteredMessages().length} {AR.dashboard.totalMessages}
+        </div>
+      </div>
+
       {filteredMessages.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-[50vh] text-gray-500">
           <Inbox className="w-16 h-16 mb-4 opacity-20" />
@@ -492,62 +579,186 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMessages.map((msg) => (
+          {getFilteredMessages().map((msg) => (
             <div key={msg.id} id={`message-${msg.id}`} className="relative group">
               <GlassCard 
-                className={`h-full flex flex-col justify-between transition-all duration-300 ${msg.readStatus ? 'opacity-70' : 'border-primary/50'}`}
+                className={`h-full flex flex-col justify-between transition-all duration-300 ${msg.readStatus ? 'opacity-70' : 'border-primary/50'} ${msg.isPinned ? 'ring-2 ring-primary/30' : ''}`}
                 hoverEffect
               >
-                <div className="mb-4">
+                <div className="mb-4 relative">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 text-primary font-bold text-sm">
                         <User className="w-3 h-3" />
-                        {msg.senderName || "Anonymous"}
+                        {msg.senderName || AR.messageCard.anonymous}
+                        {msg.isPinned && <Pin className="w-3 h-3 text-primary fill-primary" />}
+                        {msg.isFavorite && <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />}
                       </div>
                       <span className="text-[10px] text-gray-500 font-mono uppercase tracking-widest">
-                        {msg.timestamp?.seconds
-                          ? format(new Date(msg.timestamp.seconds * 1000), "PPpp", { locale: arEG })
-                          : "Just now"}
+                        {timeAgo(msg.timestamp)}
                       </span>
                     </div>
-                    {msg.readStatus && <Check className="w-4 h-4 text-green-500" />}
+                    <div className="flex items-center gap-1">
+                      {msg.readStatus && <Check className="w-4 h-4 text-green-500" />}
+                      <button 
+                        onClick={() => togglePin(msg.id, !!msg.isPinned)}
+                        className={`p-1.5 rounded-full transition-colors ${msg.isPinned ? 'text-primary bg-primary/10' : 'text-gray-600 hover:text-white hover:bg-white/5'}`}
+                      >
+                        <Pin className="w-3.5 h-3.5" />
+                      </button>
+                      <button 
+                        onClick={() => toggleFavorite(msg.id, !!msg.isFavorite)}
+                        className={`p-1.5 rounded-full transition-colors ${msg.isFavorite ? 'text-yellow-400 bg-yellow-400/10' : 'text-gray-600 hover:text-white hover:bg-white/5'}`}
+                      >
+                        <Star className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                   
                   {/* Mood Indicator */}
                   {msg.mood && (
-                    <div className="absolute top-4 right-4 text-2xl animate-pulse">
+                    <div className="absolute top-0 right-12 text-2xl animate-pulse opacity-50">
                       {msg.mood}
                     </div>
                   )}
 
-                  <p className={`text-white text-lg leading-relaxed whitespace-pre-wrap mt-2 ${stealthMode ? 'blur-md hover:blur-none transition-all duration-300' : ''}`}>
+                  <p className={`text-white text-lg leading-relaxed whitespace-pre-wrap mt-2 ${stealthMode ? 'blur-md hover:blur-none transition-all duration-300' : ''}`} style={{ direction: 'rtl' }}>
                     {msg.content}
                   </p>
+
+                  {/* Admin Reaction Display */}
+                  {msg.adminReaction && (
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="mt-4 flex items-center gap-2"
+                    >
+                      <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xl">
+                        {msg.adminReaction}
+                      </div>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-tighter">ردّك</span>
+                    </motion.div>
+                  )}
+
+                  {/* Admin Reply Display */}
+                  {msg.adminReply && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/20 relative overflow-hidden group/reply"
+                    >
+                      <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+                      <div className="flex items-center gap-2 mb-2 text-[10px] text-primary font-bold uppercase tracking-widest">
+                        <MessageCircle className="w-3 h-3" />
+                        ردّك الرسمي
+                      </div>
+                      <p className="text-sm text-gray-300 italic" style={{ direction: 'rtl' }}>
+                        "{msg.adminReply}"
+                      </p>
+                    </motion.div>
+                  )}
                 </div>
 
-                <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => toggleReadStatus(msg.id, msg.readStatus)}
-                    className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-                    title={msg.readStatus ? "Mark as Unread" : "Mark as Read"}
-                  >
-                    {msg.readStatus ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                  <button
-                    onClick={() => handleShare(msg)}
-                    className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-blue-400 transition-colors"
-                    title="Share to Story"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(msg.id)}
-                    className="p-2 rounded-full hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                <div className="space-y-4">
+                  {/* Reply Input Area */}
+                  <AnimatePresence>
+                    {replyingTo === msg.id && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <textarea
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder={AR.messageCard.replyPlaceholder}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary min-h-[80px] resize-none mb-2"
+                          style={{ direction: 'rtl' }}
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button 
+                            onClick={() => setReplyingTo(null)}
+                            className="px-4 py-2 rounded-lg text-xs text-gray-400 hover:text-white transition-colors"
+                          >
+                            إلغاء
+                          </button>
+                          <button 
+                            onClick={() => handleReply(msg.id)}
+                            className="px-4 py-2 rounded-lg text-xs bg-primary text-black font-bold hover:bg-primary/90 transition-all"
+                          >
+                            {AR.messageCard.sendReply}
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Reaction Picker */}
+                  <AnimatePresence>
+                    {showReactionPicker === msg.id && (
+                      <motion.div 
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.8, opacity: 0 }}
+                        className="flex flex-wrap gap-2 p-2 bg-white/5 rounded-xl border border-white/10"
+                      >
+                        {ADMIN_REACTIONS.map((emoji) => (
+                          <button
+                            key={emoji}
+                            onClick={() => handleReaction(msg.id, emoji)}
+                            className="text-xl hover:scale-125 transition-transform p-1"
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-between items-center pt-4 border-t border-white/5">
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => setShowReactionPicker(showReactionPicker === msg.id ? null : msg.id)}
+                        className={`p-2 rounded-full transition-all ${showReactionPicker === msg.id ? 'bg-primary text-black' : 'hover:bg-white/10 text-gray-400 hover:text-primary'}`}
+                        title={AR.messageCard.react}
+                      >
+                        <Heart className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setReplyingTo(replyingTo === msg.id ? null : msg.id)}
+                        className={`p-2 rounded-full transition-all ${replyingTo === msg.id ? 'bg-primary text-black' : 'hover:bg-white/10 text-gray-400 hover:text-primary'}`}
+                        title={AR.messageCard.reply}
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => toggleReadStatus(msg.id, msg.readStatus)}
+                        className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                        title={msg.readStatus ? AR.dashboard.markUnread : AR.dashboard.markRead}
+                      >
+                        {msg.readStatus ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={() => handleShare(msg)}
+                        className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-blue-400 transition-colors"
+                        title={AR.messageCard.shareStory}
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(msg.id)}
+                        className="p-2 rounded-full hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-colors"
+                        title={AR.messageCard.delete}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </GlassCard>
             </div>
