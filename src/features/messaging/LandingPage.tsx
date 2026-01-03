@@ -1,8 +1,9 @@
+/** @jsxImportSource react */
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { collection, addDoc, serverTimestamp, query, where, orderBy, limit, onSnapshot, doc, onSnapshot as onDocSnapshot } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, where, orderBy, limit, onSnapshot, doc } from "firebase/firestore";
 import { 
   signInWithPopup, 
   GoogleAuthProvider, 
@@ -16,12 +17,12 @@ import { auth, db } from "@/core/lib/firebase";
 import GlassCard from "@/shared/components/GlassCard";
 import GradientButton from "@/shared/components/GradientButton";
 import AnimatedBackground from "@/shared/components/AnimatedBackground";
-import { CheckCircle, AlertCircle, Lock, Mail, User as UserIcon, LogIn, Bell, Heart, MessageCircle, LogOut } from "lucide-react";
+import { CheckCircle, AlertCircle, Lock, Mail, User as UserIcon, LogOut } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { playSound, vibrate } from "@/core/utils/sound";
 import AboutModal from "@/shared/components/AboutModal";
-import { AR, MOODS, timeAgo } from "@/core/constants";
+import { AR, MOODS } from "@/core/constants";
 import { isToxic } from "@/core/utils/profanity";
 
 const TypewriterText = ({ text }: { text: string }) => {
@@ -56,7 +57,6 @@ export default function LandingPage() {
   const [showAbout, setShowAbout] = useState(false);
   const [lastReaction, setLastReaction] = useState<string | null>(null);
   const [lastReply, setLastReply] = useState<string | null>(null);
-  const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -94,22 +94,6 @@ export default function LandingPage() {
     }
   };
 
-  const handleAnonymousLogin = async () => {
-    try {
-      setLoading(true);
-      await signInAnonymously(auth);
-      playSound("success");
-      vibrate([10, 30, 10]);
-      toast.success(AR.auth.anonymousSuccess);
-    } catch (error) {
-      console.error("Anonymous login error:", error);
-      toast.error(AR.auth.loginFailed);
-      playSound("error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -131,7 +115,6 @@ export default function LandingPage() {
     }
   };
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || !user) return;
@@ -142,14 +125,12 @@ export default function LandingPage() {
       return;
     }
 
-    // --- Profanity Check ---
     if (isToxic(message) || isToxic(senderName)) {
       playSound("error");
       toast.error("عيب يا بطل.. خليك محترم في كلامك! 🚫", {
         icon: <span>🤫</span>,
         style: { background: "#000", color: "#fff", border: "1px solid #ff0000" }
       });
-      vibrate([100, 50, 100]);
       return;
     }
 
@@ -183,7 +164,6 @@ export default function LandingPage() {
     }
   };
 
-  // Real-time Reactions Listener
   useEffect(() => {
     if (!user) return;
     
@@ -194,8 +174,8 @@ export default function LandingPage() {
       limit(1)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
+    const unsubscribe = onSnapshot(q, (snapshot: any) => {
+      snapshot.docChanges().forEach((change: any) => {
         if (change.type === "modified") {
           const data = change.doc.data();
           if (data.readStatus === true) {
@@ -204,7 +184,6 @@ export default function LandingPage() {
             });
             playSound("notification");
           }
-          // Admin reaction notification
           if (data.adminReaction && data.adminReaction !== lastReaction) {
             setLastReaction(data.adminReaction);
             toast(`${AR.notifications.adminReacted} ${data.adminReaction}`, {
@@ -213,7 +192,6 @@ export default function LandingPage() {
             playSound("notification");
             vibrate([50, 100, 50]);
           }
-          // Admin reply notification
           if (data.adminReply && data.adminReply !== lastReply) {
             setLastReply(data.adminReply);
             toast(AR.notifications.newReply, {
@@ -227,10 +205,9 @@ export default function LandingPage() {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, lastReaction, lastReply]);
 
-  // Dynamic UI: Calculate intensity based on message length
-  const intensity = Math.min(message.length / 200, 1); // 0 to 1
+  const intensity = Math.min(message.length / 200, 1);
 
   if (authLoading) {
     return (
@@ -245,7 +222,6 @@ export default function LandingPage() {
       <AnimatedBackground />
       <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
       
-      {/* Dynamic UI Overlay */}
       <motion.div 
         className="absolute inset-0 pointer-events-none z-0"
         animate={{
@@ -255,19 +231,18 @@ export default function LandingPage() {
 
       <ToastContainer position="top-center" theme="dark" />
 
-      {/* Header Branding */}
       <motion.div 
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center backdrop-blur-md bg-black/20 border-b border-white/5"
       >
-        <button 
+        <motion.button 
           onClick={() => setShowAbout(true)}
           className="text-3xl md:text-4xl font-bold text-white tracking-tighter group flex items-center gap-2"
           dir="ltr"
         >
           onyx<span className="text-gradient-blue group-hover:brightness-125 transition-all">box</span>
-        </button>
+        </motion.button>
 
         <div className="flex items-center gap-4">
           <button 
@@ -300,7 +275,6 @@ export default function LandingPage() {
           )}
         </div>
       </motion.div>
-
 
       <AnimatePresence mode="wait">
         {!user ? (
@@ -350,15 +324,6 @@ export default function LandingPage() {
                       <span className="px-4 bg-[#030305] text-gray-600">الخصوصية أولاً 🔒</span>
                     </div>
                   </div>
-
-                  <button
-                    onClick={handleAnonymousLogin}
-                    className="w-full flex items-center justify-center gap-3 bg-gray-800 text-gray-300 font-bold py-3 rounded-xl hover:bg-gray-700 transition-all transform hover:scale-[1.02]"
-                    onMouseEnter={() => playSound("hover")}
-                  >
-                    <UserIcon className="w-5 h-5" />
-                    {AR.auth.continueAnonymous}
-                  </button>
                 </div>
               ) : (
                 <form onSubmit={handleEmailAuth} className="space-y-4">
@@ -367,7 +332,7 @@ export default function LandingPage() {
                       type="email"
                       placeholder={AR.auth.emailPlaceholder}
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                       className="w-full bg-glass-bg border border-glass-border rounded-lg p-3 text-white focus:border-primary focus:outline-none"
                       required
                     />
@@ -377,7 +342,7 @@ export default function LandingPage() {
                       type="password"
                       placeholder={AR.auth.passwordPlaceholder}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                       className="w-full bg-glass-bg border border-glass-border rounded-lg p-3 text-white focus:border-primary focus:outline-none"
                       required
                     />
@@ -403,26 +368,11 @@ export default function LandingPage() {
           <motion.div
             key="form"
             initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ 
-              opacity: 1, 
-              scale: 1,
-            }}
-            transition={{
-              opacity: { duration: 0.5 },
-              scale: { duration: 0.5 }
-            }}
-            exit={{ 
-              opacity: 0, 
-              y: -100,
-              scale: 0.9,
-              filter: "blur(10px)",
-              transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] } 
-            }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, y: -100, scale: 0.9, filter: "blur(10px)" }}
             className="w-full max-w-xl perspective-1000 z-10"
           >
-            <motion.div
-              className="w-full relative group"
-            >
+            <motion.div className="w-full relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
               
               <GlassCard className="p-6 md:p-12 relative">
@@ -445,15 +395,6 @@ export default function LandingPage() {
                 </div>
 
                 <motion.div 
-                  variants={{
-                    hidden: { opacity: 0 },
-                    show: {
-                      opacity: 1,
-                      transition: {
-                        staggerChildren: 0.1
-                      }
-                    }
-                  }}
                   initial="hidden"
                   animate="show"
                   className="flex flex-wrap justify-center gap-2 md:gap-4 mb-10"
@@ -461,10 +402,6 @@ export default function LandingPage() {
                   {MOODS.map((m) => (
                     <motion.button
                       key={m}
-                      variants={{
-                        hidden: { opacity: 0, scale: 0.5, y: 20 },
-                        show: { opacity: 1, scale: 1, y: 0 }
-                      }}
                       onClick={() => {
                         setMood(m);
                         playSound("click");
@@ -484,7 +421,7 @@ export default function LandingPage() {
                     <div className="relative group">
                       <textarea
                         value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
                         placeholder={AR.form.placeholder}
                         className="w-full h-40 bg-black/40 border border-white/10 rounded-2xl p-6 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all resize-none text-lg leading-relaxed"
                         required
@@ -499,7 +436,7 @@ export default function LandingPage() {
                       <input
                         type="text"
                         value={senderName}
-                        onChange={(e) => setSenderName(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSenderName(e.target.value)}
                         placeholder={AR.form.namePlaceholder}
                         className="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-primary/50 transition-all"
                       />

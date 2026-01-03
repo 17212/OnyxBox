@@ -57,7 +57,12 @@ export default function DashboardPage() {
     padding: "80px",
     fontFamily: "font-sans",
     moodSize: "text-6xl",
-    overlayOpacity: 0.5
+    overlayOpacity: 0.4,
+    blurIntensity: "30px",
+    borderWidth: "1px",
+    lineHeight: "1.6",
+    noiseOpacity: 0.05,
+    cardOpacity: 0.05,
   });
 
   const BACKGROUNDS = [
@@ -284,6 +289,24 @@ export default function DashboardPage() {
                       backgroundSize: "60px 60px"
                     }} 
                   />
+
+                  {/* Overlay for Background Contrast */}
+                  <div 
+                    className="absolute inset-0 pointer-events-none z-[1]"
+                    style={{ 
+                      backgroundColor: "#000000",
+                      opacity: storyConfig.overlayOpacity 
+                    }}
+                  />
+
+                  {/* Noise Texture */}
+                  <div 
+                    className="absolute inset-0 pointer-events-none z-[2] opacity-[0.05]"
+                    style={{ 
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                      opacity: storyConfig.noiseOpacity
+                    }}
+                  />
                   
                   <div className="relative w-[800px] z-10 flex flex-col items-center">
                     {/* Main Card */}
@@ -292,15 +315,15 @@ export default function DashboardPage() {
                       style={{ 
                         padding: storyConfig.padding,
                         borderRadius: storyConfig.borderRadius,
-                        backgroundColor: storyConfig.cardStyle === "solid" ? "#0a0a0c" : "rgba(255, 255, 255, 0.03)",
-                        border: storyConfig.cardStyle === "neon" ? `2px solid ${storyConfig.accentColor}` : "1px solid rgba(255, 255, 255, 0.1)",
+                        backgroundColor: storyConfig.cardStyle === "solid" ? "#0a0a0c" : `rgba(255, 255, 255, ${storyConfig.cardOpacity})`,
+                        border: storyConfig.cardStyle === "neon" ? `${storyConfig.borderWidth} solid ${storyConfig.accentColor}` : `${storyConfig.borderWidth} solid rgba(255, 255, 255, 0.1)`,
                         boxShadow: storyConfig.cardStyle === "neon" ? `0 0 40px ${storyConfig.accentColor}44` : "0 20px 50px rgba(0,0,0,0.5)",
-                        backdropFilter: storyConfig.cardStyle === "glass" ? "blur(30px)" : "none",
+                        backdropFilter: storyConfig.cardStyle === "glass" ? `blur(${storyConfig.blurIntensity})` : "none",
                       }}
                     >
                       {/* Card Header */}
                       <div className="flex flex-col items-center mb-12">
-                        <div className="flex items-center gap-4 mb-8">
+                        <div className="flex items-center gap-4 mb-8" dir="ltr">
                           <span className="text-5xl font-black text-white tracking-tighter uppercase">onyx</span>
                           <span className="text-5xl font-black tracking-tighter uppercase" style={{ color: storyConfig.accentColor }}>box</span>
                         </div>
@@ -317,11 +340,12 @@ export default function DashboardPage() {
                       {/* Message Content */}
                       <p 
                         className={`
-                          ${storyConfig.fontSize} ${storyConfig.textAlign} font-bold leading-[1.6] ${storyConfig.fontFamily} text-white
+                          ${storyConfig.fontSize} ${storyConfig.textAlign} font-bold ${storyConfig.fontFamily} text-white
                           ${storyConfig.glowEffect ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]' : ''}
                         `}
                         style={{ 
                           direction: "rtl",
+                          lineHeight: storyConfig.lineHeight,
                           fontSize: storyConfig.fontSize === "text-xl" ? "40px" : 
                                     storyConfig.fontSize === "text-2xl" ? "56px" : 
                                     storyConfig.fontSize === "text-3xl" ? "72px" : "88px"
@@ -518,6 +542,71 @@ export default function DashboardPage() {
                         type="range" min="0" max="1" step="0.05"
                         value={storyConfig.overlayOpacity}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoryConfig({ ...storyConfig, overlayOpacity: parseFloat(e.target.value) })}
+                        className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Blur Intensity</label>
+                        <span className="text-[10px] text-primary font-mono">{storyConfig.blurIntensity}</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="100" step="5"
+                        value={parseInt(storyConfig.blurIntensity)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoryConfig({ ...storyConfig, blurIntensity: `${e.target.value}px` })}
+                        className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Border Width</label>
+                        <span className="text-[10px] text-primary font-mono">{storyConfig.borderWidth}</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="20" step="1"
+                        value={parseInt(storyConfig.borderWidth)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoryConfig({ ...storyConfig, borderWidth: `${e.target.value}px` })}
+                        className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Line Height</label>
+                        <span className="text-[10px] text-primary font-mono">{storyConfig.lineHeight}</span>
+                      </div>
+                      <input 
+                        type="range" min="1" max="3" step="0.1"
+                        value={parseFloat(storyConfig.lineHeight)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoryConfig({ ...storyConfig, lineHeight: e.target.value })}
+                        className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Noise Opacity</label>
+                        <span className="text-[10px] text-primary font-mono">{Math.round(storyConfig.noiseOpacity * 100)}%</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="0.5" step="0.01"
+                        value={storyConfig.noiseOpacity}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoryConfig({ ...storyConfig, noiseOpacity: parseFloat(e.target.value) })}
+                        className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold">Card Opacity</label>
+                        <span className="text-[10px] text-primary font-mono">{Math.round(storyConfig.cardOpacity * 100)}%</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="1" step="0.05"
+                        value={storyConfig.cardOpacity}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStoryConfig({ ...storyConfig, cardOpacity: parseFloat(e.target.value) })}
                         className="w-full accent-primary h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
                       />
                     </div>
